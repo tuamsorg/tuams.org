@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Tuams — Geographic Bitcoin Custody</title>
+<meta name="robots" content="noindex, nofollow">
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:#000;color:#fff;font-family:monospace;height:100%}
+html{width:100vw;overflow-x:hidden}
+a{color:#fff}
+
+.glow-link{color:#fff;text-decoration:none;text-shadow:0 0 0 rgba(255,255,255,0);transition:text-shadow .18s ease}
+.glow-link:hover{text-shadow:0 0 10px rgba(255,255,255,.8)}
+
+header{padding:1.8rem clamp(1.2rem,5vw,4rem);border-bottom:1px solid #fff;display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap}
+header h1{font-size:clamp(1.6rem,3vw,2.3rem);margin:0;display:flex;align-items:center;gap:.6rem;flex-wrap:wrap}
+
+.psbt-btn{
+  background:#F7931A;color:#000;border:none;border-radius:4px;
+  padding:.55rem 1rem;font-weight:600;text-decoration:none;font-family:monospace;
+  box-shadow:0 0 0 0 rgba(247,147,26,.45);
+  transition:box-shadow .18s ease,filter .18s ease;
+}
+.psbt-btn:hover{filter:brightness(1.08);box-shadow:0 0 0 4px rgba(247,147,26,.35)}
+
+main{display:grid;grid-template-columns:minmax(0,2.2fr) minmax(300px,380px);min-height:calc(100% - 140px)}
+@media (max-width:880px){
+  /* align-content:start évite que la grille étire les 2 lignes (carte +
+     panneau) quand le contenu est plus court que min-height, ce qui
+     décalerait le titre du panneau vers le bas selon l'atoll affiché. */
+  main{grid-template-columns:1fr;align-content:start}
+  .chart-wrap{border-right:none;border-bottom:1px solid #fff}
+}
+
+.chart-wrap{padding:clamp(1rem,3vw,2.2rem);border-right:1px solid #fff}
+
+svg.chart{width:100%;height:auto;display:block;aspect-ratio:900/600}
+.depth-line{fill:none;stroke:#F7931A;stroke-width:1}
+.atoll{cursor:pointer}
+.atoll .ring{fill:none;stroke:#fff;stroke-width:3;transition:stroke .18s ease}
+.atoll .lagoon-fill{fill:rgba(63,216,196,.06);transition:fill .18s ease}
+.atoll:hover .lagoon-fill,.atoll:focus-visible .lagoon-fill{fill:rgba(63,216,196,.18)}
+.atoll.active .lagoon-fill{fill:#F7931A}
+.atoll.active .ring{stroke:#F7931A}
+.atoll text{fill:#fff;font-size:24px;pointer-events:none}
+
+aside{padding:clamp(1.2rem,3vw,2rem);min-height:260px}
+
+.panel-header{display:flex;justify-content:space-between;align-items:center;gap:.75rem;margin-bottom:1.5rem;padding-top:1.5rem}
+/* Le premier bloc affiché (posé en JS, indépendant du numéro fixe de
+   l'xpub) n'a pas de padding-top, quel que soit le nombre de blocs. */
+.panel-header.panel-header--first{padding-top:0}
+
+.field-value{
+  font-size:1rem;background:#000;border:1px solid #fff;border-radius:4px;
+  padding:.55rem .65rem;word-break:break-all;color:#fff;
+  display:flex;justify-content:space-between;align-items:center;gap:.5rem;
+}
+.field-value + .field-value{margin-top:.8rem}
+.field-value button{flex:none;background:none;border:none;color:#fff;font-size:.9rem;cursor:pointer;padding:.2rem .3rem}
+.fee-note{font-size:.95rem;color:#fff;margin-top:1rem}
+
+/* Le badge Testnet du header réutilise ces mêmes classes (status-note
+   status-down) pour rester visuellement identique au badge Unavailable. */
+.status-note{
+  display:inline-flex;align-items:center;justify-content:center;
+  height:1.9rem;overflow:hidden;line-height:1;
+  font-size:.9rem;font-weight:700;
+  padding:0 .6rem;border-radius:20px;
+}
+.status-note.status-ok{background:rgba(46,204,113,.15);color:#2ECC71;border:1px solid #2ECC71}
+.status-note.status-pending{background:rgba(247,147,26,.15);color:#F7931A;border:1px solid #F7931A}
+.status-note.status-down{background:rgba(231,76,60,.15);color:#E74C3C;border:1px solid #E74C3C}
+
+.pay-block{text-align:center;margin-top:2.2rem}
+
+footer{padding:1.5rem clamp(1.2rem,5vw,4rem);color:#fff;font-size:.95rem;text-align:left}
+
+.onboarding-group{margin-bottom:1.8rem}
+.onboarding-group:last-child{margin-bottom:0}
+
+.onboarding-label{
+  color:#fff;text-transform:uppercase;font-weight:700;
+  font-size:1.05rem;letter-spacing:.05em;margin:1.5rem 0 1.3rem;
+}
+
+.onboarding{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:.9rem}
+.onboarding li{display:flex;align-items:center;gap:.7rem;font-size:.95rem;line-height:1.5;color:#fff}
+
+.step-num{
+  flex:none;display:inline-flex;align-items:center;justify-content:center;
+  width:1.6rem;height:1.6rem;border-radius:50%;
+  border:1px solid #fff;color:#fff;
+  font-size:.8rem;font-weight:700;line-height:1;
+}
+.step-num--icon{border:none;font-size:1.1rem}
+
+.onboarding-text{margin:0 0 1rem;color:#fff;font-size:.95rem;line-height:1.6}
+.onboarding-text:last-child{margin-bottom:0}
+
+.panel-title--gap{margin-bottom:1.2rem}
+</style>
+</head>
+<body>
+
+<header>
+  <h1><a class="glow-link" href="/">tuams.org</a> <span class="status-note status-pending">Pending: Napuka #01 — Hao #01 — Manihi #01</span></h1>
+  <a class="psbt-btn" href="mailto:PSBT@tuams.org">PSBT</a>
+</header>
+
+<main>
+  <div class="chart-wrap">
+    <svg class="chart" viewBox="0 0 900 600" role="img" aria-label="Stylized map of the Tuamotu">
+      <g opacity="0.5">
+        <circle class="depth-line" cx="380" cy="300" r="120"></circle>
+        <circle class="depth-line" cx="380" cy="300" r="220"></circle>
+        <circle class="depth-line" cx="380" cy="300" r="320"></circle>
+      </g>
+      <g id="atolls"></g>
+    </svg>
+  </div>
+
+  <aside id="panel">
+    <h2 class="panel-title panel-title--gap">Why?</h2>
+    <p class="onboarding-text">Tuams introduces a new dimension in Bitcoin security: Geography.</p>
+    <p class="onboarding-text">French Polynesia has one of the largest sets of atolls in the world: the Tuamotu — nicknamed Tuams.</p>
+    <p class="onboarding-label">Generation</p>
+    <p class="onboarding-text">A Trezor Safe 5 (Seedless, MicroSD Card Encryption) is deposited on an atoll.</p>
+    <p class="onboarding-text">The MicroSD needed to use it is kept in Tahiti.</p>
+
+    <div class="onboarding-group">
+      <p class="onboarding-label">Opening</p>
+      <ol class="onboarding">
+        <li><span class="step-num">1</span><span>Select an atoll on the map and pick an available xpub.</span></li>
+        <li><span class="step-num">2</span><span>Pay the opening fees with a Bitcoin address that you own.</span></li>
+        <li><span class="step-num step-num--icon">⚷︎</span><span>Now your payment address is your PROOF address linked to the selected xpub.</span></li>
+      </ol>
+      <p class="onboarding-label">Integration</p>
+      <ol class="onboarding">
+        <li><span class="step-num">3</span><span>Integrate the xpub into the architecture of your choice.</span></li>
+        <li><span class="step-num step-num--icon">⚠︎</span><span>Plan for an independent recovery method.</span></li>
+      </ol>
+    </div>
+
+    <div class="onboarding-group">
+      <p class="onboarding-label">Signing</p>
+      <ol class="onboarding">
+        <li><span class="step-num">4</span><span>Send your PSBT → <a class="glow-link" href="mailto:PSBT@tuams.org">PSBT@tuams.org</a>.</span></li>
+        <li><span class="step-num">5</span><span>Pay the travel fees with your PROOF Bitcoin address.</span></li>
+        <li><span class="step-num step-num--icon">✈︎</span><span>Tuams is leaving Tahiti for the atoll to sign and return your PSBT.</span></li>
+        <li><span class="step-num">6</span><span>You can broadcast it.</span></li>
+      </ol>
+    </div>
+  </aside>
+</main>
+
+<footer>
+  © The Tuams Organization — <a class="glow-link" href="https://www.tuams.org/">https://www.tuams.org/</a> — 2.22.59
+</footer>
+
+<script>
+// ==========================================================================
+// ÉDITION RAPIDE PAR CLÉ — tout se passe ici, dans xpubs: [ ... ] ci-dessous.
+// Chaque clé est un objet avec ces champs :
+//
+//   num:     numéro fixe affiché dans le titre (ex: 1 → "Hao #01"). Ne change
+//            jamais la position d'affichage (voir statusPriority plus bas).
+//   value:   le xpub lui-même.
+//   status:  "Available ✓"  → badge vert, montant + bouton PAY affichés.
+//            "Pending"      → badge orange, pas de PAY.
+//            "Unavailable"  → badge rouge, pas de PAY.
+//            Pending et Unavailable affichent tous deux le champ tx s'il
+//            est défini — aucune différence entre les deux à ce niveau.
+//   tx:      (optionnel) valeur copiable affichée sous le xpub, dès qu'elle
+//            est définie, quel que soit le statut.
+//
+// Exemples :
+//   { num: 1, value: "xpub...", status: "Available ✓" }
+//   { num: 2, value: "xpub...", status: "Pending...", tx: "abcd...1234" }
+//   { num: 3, value: "xpub...", status: "Unavailable", tx: "abcd...1234" }
+// ==========================================================================
+const TUAMS_CONFIG = {
+  atolls: [
+    { id: "manihi",  name: "Manihi",  x: 339, y: 120, r: 30, fee: "0.019", postal: 98771,
+      xpubs: [{ num: 1, value: "xpubJKDF98798DSF98_MANIHI", status: "Pending", tx: "0000000000000000000000000000000000000000000000000000000000dead" }] },
+    { id: "mataiva", name: "Mataiva", x: 100, y: 168, r: 22, fee: "0.018", postal: 98777,
+      xpubs: [{ num: 1, value: "xpub6C_D8S9F7S9DFD_MATA", status: "Available ✓" }] },
+    { id: "makemo",  name: "Makemo",  x: 556, y: 358, r: 40, fee: "0.017", postal: 98769,
+      xpubs: [{ num: 1, value: "xpub6C_DF89SD8F0SD9_MAKEMO", status: "Available ✓" }] },
+    { id: "anaa",    name: "Anaa",    x: 389, y: 439, r: 26, fee: "0.016", postal: 98760,
+      xpubs: [{ num: 1, value: "xpub6C_DSF89S9D8F0S_XPUB_ANAA", status: "Available ✓" }] },
+    { id: "hao",     name: "Hao",     x: 800, y: 520, r: 44, fee: "0.014", postal: 98767,
+      xpubs: [
+        { num: 2, value: "xpub6C_A1B2C3D4E5F6_XPUB_HAO_2", status: "Available ✓" },
+        { num: 1, value: "xpub6C_DSF87S09D78FS9D7_XPUB_HAO", status: "Pending", tx: "a1b2c3d4e5f6789012345678901234567890123456789012345678901234ab" },
+      ] },
+    { id: "napuka",  name: "Napuka",  x: 775, y: 90,  r: 22, fee: "0.015", postal: 98772,
+      xpubs: [
+        { num: 1, value: "xpub6C_DSF879SD87FS_NAPUKA", status: "Pending", tx: "f4184fc596403b9d638783cf57adfe4c75c605f6356fbc91338530e9831e9e16" },
+        { num: 2, value: "xpub6C_DSF879SD87FS_NAPUKA_2", status: "Unavailable", tx: "2f4184fc596403b9d638783cf57adfe4c75c605f6356fbc91338530e9831e9e16" },
+        { num: 3, value: "xpub6C_DSF879SD87FS_NAPUKA_3", status: "Unavailable", tx: "3f4184fc596403b9d638783cf57adfe4c75c605f6356fbc91338530e9831e9e16" },
+        { num: 4, value: "xpub6C_DSF879SD87FS_NAPUKA_4", status: "Unavailable", tx: "4f4184fc596403b9d638783cf57adfe4c75c605f6356fbc91338530e9831e9e16" },
+        { num: 5, value: "xpub6C_DSF879SD87FS_NAPUKA_5", status: "Unavailable", tx: "5f4184fc596403b9d638783cf57adfe4c75c605f6356fbc91338530e9831e9e16" },
+      ] },
+  ],
+};
+
+const MAIN_BTC_ADDRESS = "bc1qp6ejw8ptj9l9pkscmlf8fhhkrrjeawgpyjvtq8";
+const svgNS = "http://www.w3.org/2000/svg";
+const atollsGroup = document.getElementById("atolls");
+const panel = document.getElementById("panel");
+// Contenu par défaut (Why/Generation/Opening/Integration/Signing), affiché
+// tant qu'aucun atoll n'est sélectionné et restauré si on désélectionne.
+const DEFAULT_PANEL_HTML = panel.innerHTML;
+
+// --- Sats de référence (fixes, déterministes) ---------------------------
+// Le site étant statique (pas de backend), une seule adresse BTC reçoit
+// tous les paiements : on ne peut donc pas relier un paiement à un client
+// via l'adresse elle-même. On ajoute au montant de base un supplément fixe
+// en sats = (2 derniers chiffres du code postal de l'atoll) + (numéro de
+// la clé, 2 chiffres). Ex: Hao (98767 → "67") + clé #02 → 6702 sats.
+// Déterministe : calculable à l'avance pour chaque xpub, sans dépendre
+// d'une communication du client. Reste une empreinte pratique, pas une
+// preuve cryptographique (la formule est visible dans ce code source) :
+// n'importe qui peut recalculer ce montant et payer pour le même xpub.
+// Politique affichée au client : premier payé, premier servi — en cas de
+// paiements multiples sur un même xpub, les paiements surnuméraires sont
+// remboursés (traitement manuel, hors site, basé sur l'horodatage on-chain).
+function btcToSats(btc){ return Math.round(parseFloat(btc) * 1e8); }
+function satsToBtc(sats){ return (sats / 1e8).toFixed(8); }
+function refSats(atoll, xpub){
+  const postalSuffix = String(atoll.postal % 100).padStart(2, "0");
+  const keyNum = String(xpub.num).padStart(2, "0");
+  return parseInt(postalSuffix + keyNum, 10);
+}
+
+function svgEl(tag, attrs){
+  const el = document.createElementNS(svgNS, tag);
+  for (const key in attrs) el.setAttribute(key, attrs[key]);
+  return el;
+}
+
+function createAtollMarker(atoll){
+  const g = svgEl("g", {
+    class: "atoll", "data-id": atoll.id, tabindex: "0",
+    role: "button", "aria-label": "Atoll " + atoll.name,
+  });
+  const fill = svgEl("circle", { class: "lagoon-fill", cx: atoll.x, cy: atoll.y, r: atoll.r - 5 });
+  const ring = svgEl("circle", { class: "ring", cx: atoll.x, cy: atoll.y, r: atoll.r });
+  const label = svgEl("text", { x: atoll.x, y: atoll.y + atoll.r + 30, "text-anchor": "middle" });
+  label.textContent = atoll.name;
+
+  g.append(fill, ring, label);
+  g.addEventListener("click", () => selectAtoll(atoll.id));
+  g.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") selectAtoll(atoll.id); });
+  return g;
+}
+
+TUAMS_CONFIG.atolls.forEach(atoll => atollsGroup.appendChild(createAtollMarker(atoll)));
+
+function selectAtoll(id){
+  const g = document.querySelector(`.atoll[data-id="${id}"]`);
+  const alreadyActive = g.classList.contains("active");
+  document.querySelectorAll(".atoll").forEach(el => el.classList.remove("active"));
+
+  if (alreadyActive) {
+    panel.innerHTML = DEFAULT_PANEL_HTML;
+    return;
+  }
+  g.classList.add("active");
+  renderPanel(TUAMS_CONFIG.atolls.find(a => a.id === id));
+}
+
+function renderSlot(atoll, xpub, displayIndex){
+  const label = `${atoll.name} #${String(xpub.num).padStart(2, "0")}`;
+  const isAvailable = xpub.status.startsWith("Available");
+  const isPending = xpub.status.startsWith("Pending");
+  const isUnavailable = !isAvailable && !isPending;
+  const statusClass = isAvailable ? "status-ok" : isPending ? "status-pending" : "status-down";
+  const headerClass = "panel-header" + (displayIndex === 0 ? " panel-header--first" : "");
+
+  // Le champ tx s'affiche dès qu'il est défini sur le xpub, quel que soit
+  // son statut (Pending ou Unavailable) — pas de distinction entre les deux.
+  const txField = xpub.tx ? `
+      <div class="field-value"><span>${xpub.tx}</span><button data-copy="${xpub.tx}" aria-label="Copy ${label} tx">COPY</button></div>` : "";
+
+  let feeBlock = "", payBlock = "";
+  if (isAvailable) {
+    const noiseSats = refSats(atoll, xpub);
+    const totalBtc = satsToBtc(btcToSats(atoll.fee) + noiseSats);
+    feeBlock = `
+      <div class="fee-note">Opening fees: ${totalBtc} BTC</div>`;
+    payBlock = `
+      <div class="pay-block"><a class="psbt-btn" href="bitcoin:${MAIN_BTC_ADDRESS}?amount=${totalBtc}&label=${encodeURIComponent(label)}">PAY</a></div>`;
+  }
+
+  return `
+      <div class="${headerClass}">
+        <h2 class="panel-title">${label}</h2>
+        <div class="status-note ${statusClass}">${xpub.status}</div>
+      </div>
+      <div class="field-value"><span>${xpub.value}</span><button data-copy="${xpub.value}" aria-label="Copy ${label} xpub">COPY</button></div>${txField}${feeBlock}${payBlock}
+    `;
+}
+
+// Ordre d'affichage : Available, puis Pending, puis Unavailable.
+function statusPriority(status){
+  if (status.startsWith("Available")) return 0;
+  if (status.startsWith("Pending")) return 1;
+  return 2;
+}
+
+function renderPanel(atoll){
+  // Chaque xpub garde son numéro fixe (xpub.num) dans le titre, indépendant
+  // de sa position ici.
+  const sorted = [...atoll.xpubs].sort((a, b) => statusPriority(a.status) - statusPriority(b.status));
+  panel.innerHTML = sorted.map((xpub, i) => renderSlot(atoll, xpub, i)).join("");
+}
+
+// Délégation d'événement unique pour tous les boutons "COPY" (panneau et
+// footer) : pas besoin de rebrancher les écouteurs à chaque rendu du panneau.
+document.addEventListener("click", e => {
+  const btn = e.target.closest("[data-copy]");
+  if (!btn) return;
+  navigator.clipboard.writeText(btn.dataset.copy).then(() => {
+    const original = btn.textContent;
+    btn.textContent = "✓ OK";
+    setTimeout(() => btn.textContent = original, 1200);
+  });
+});
+</script>
+</body>
+</html>
