@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Tuams — Geographic Bitcoin Custody</title>
+<title>tuams.org</title>
 <meta name="robots" content="noindex, nofollow">
 <style>
 *{box-sizing:border-box}
@@ -41,12 +41,19 @@ main{display:grid;grid-template-columns:minmax(0,2.2fr) minmax(300px,380px);min-
 svg.chart{width:100%;height:auto;display:block;aspect-ratio:900/600}
 .depth-line{fill:none;stroke:#F7931A;stroke-width:1}
 .atoll{cursor:pointer}
-.atoll .ring{fill:none;stroke:#fff;stroke-width:3;transition:stroke .18s ease}
+.atoll .hit{fill:transparent}
+.atoll .ring{fill:none;stroke:#fff;stroke-width:2.5;transition:stroke .18s ease}
 .atoll .lagoon-fill{fill:rgba(63,216,196,.06);transition:fill .18s ease}
 .atoll:hover .lagoon-fill,.atoll:focus-visible .lagoon-fill{fill:rgba(63,216,196,.18)}
 .atoll.active .lagoon-fill{fill:#F7931A}
 .atoll.active .ring{stroke:#F7931A}
-.atoll text{fill:#fff;font-size:24px;pointer-events:none}
+.atoll text{fill:#fff;font-size:15px;pointer-events:none;stroke:#000;stroke-width:4px;paint-order:stroke}
+.atoll:focus{outline:none}
+/* Atolls avec piste mais sans xpub : discrets, nom visible au survol/focus. */
+.atoll--empty .ring{stroke:rgba(255,255,255,.5);stroke-width:1.5}
+.atoll--empty text{opacity:0;transition:opacity .15s ease}
+.atoll--empty:hover text,.atoll--empty:focus-visible text,.atoll--empty.active text{opacity:1}
+@media (max-width:880px){ .atoll text{font-size:26px;stroke-width:6px} }
 
 aside{padding:clamp(1.2rem,3vw,2rem);min-height:260px}
 
@@ -62,10 +69,11 @@ aside{padding:clamp(1.2rem,3vw,2rem);min-height:260px}
 }
 .field-value + .field-value{margin-top:.8rem}
 .field-value button{flex:none;background:none;border:none;color:#fff;font-size:.9rem;cursor:pointer;padding:.2rem .3rem}
-.fee-note{font-size:.95rem;color:#fff;margin-top:1rem}
+.fee-note{font-size:.95rem;color:#fff;margin-top:1rem;display:flex;justify-content:space-between;flex-wrap:wrap;gap:.3rem 1rem}
+.fee-note span:last-child{margin-left:auto;text-align:right}
 
 /* Le badge Testnet du header réutilise ces mêmes classes (status-note
-   status-down) pour rester visuellement identique au badge Unavailable. */
+   status-down) pour rester visuellement identique au badge Assigned. */
 .status-note{
   display:inline-flex;align-items:center;justify-content:center;
   height:1.9rem;overflow:hidden;line-height:1;
@@ -74,6 +82,7 @@ aside{padding:clamp(1.2rem,3vw,2rem);min-height:260px}
 }
 .status-note.status-ok{background:rgba(46,204,113,.15);color:#2ECC71;border:1px solid #2ECC71}
 .status-note.status-down{background:rgba(231,76,60,.15);color:#E74C3C;border:1px solid #E74C3C}
+.status-note.status-soon{background:rgba(247,147,26,.15);color:#F7931A;border:1px solid #F7931A}
 
 .pay-block{text-align:center;margin-top:2.2rem}
 
@@ -117,11 +126,7 @@ footer{padding:1.5rem clamp(1.2rem,5vw,4rem);color:#fff;font-size:.95rem;text-al
 <main>
   <div class="chart-wrap">
     <svg class="chart" viewBox="0 0 900 600" role="img" aria-label="Stylized map of the Tuamotu">
-      <g opacity="0.5">
-        <circle class="depth-line" cx="380" cy="300" r="120"></circle>
-        <circle class="depth-line" cx="380" cy="300" r="220"></circle>
-        <circle class="depth-line" cx="380" cy="300" r="320"></circle>
-      </g>
+      <g id="rings" opacity="0.5"></g>
       <g id="atolls"></g>
     </svg>
   </div>
@@ -136,32 +141,32 @@ footer{padding:1.5rem clamp(1.2rem,5vw,4rem);color:#fff;font-size:.95rem;text-al
 
     <div class="onboarding-group">
       <p class="onboarding-label">Opening</p>
-      <ol class="onboarding">
+      <ul class="onboarding">
         <li><span class="step-num">1</span><span>Select an atoll on the map and pick an available xpub.</span></li>
         <li><span class="step-num">2</span><span>Pay the opening fees with a Bitcoin address that you own.</span></li>
-        <li><span class="step-num step-num--icon">⚷︎</span><span>Now your payment address is your PROOF address linked to the selected xpub.</span></li>
-      </ol>
+        <li><span class="step-num step-num--icon">⚷︎</span><span>Now your sending address becomes your PROOF address.</span></li>
+      </ul>
       <p class="onboarding-label">Integration</p>
-      <ol class="onboarding">
+      <ul class="onboarding">
         <li><span class="step-num">3</span><span>Integrate the xpub into the architecture of your choice.</span></li>
         <li><span class="step-num step-num--icon">⚠︎</span><span>Plan for an independent recovery method.</span></li>
-      </ol>
+      </ul>
     </div>
 
     <div class="onboarding-group">
       <p class="onboarding-label">Signing</p>
-      <ol class="onboarding">
-        <li><span class="step-num">4</span><span>Send your PSBT → <a class="glow-link" href="mailto:PSBT@tuams.org">PSBT@tuams.org</a>.</span></li>
+      <ul class="onboarding">
+        <li><span class="step-num">4</span><span>Send your PSBT → <a class="glow-link" href="mailto:PSBT@tuams.org">PSBT@tuams.org</a> <a class="glow-link" href="pgp.asc">[PGP]</a>.</span></li>
         <li><span class="step-num">5</span><span>Pay the travel fees with your PROOF Bitcoin address.</span></li>
         <li><span class="step-num step-num--icon">✈︎</span><span>Tuams is leaving Tahiti for the atoll to sign and return your PSBT.</span></li>
-        <li><span class="step-num">6</span><span>You can broadcast it.</span></li>
-      </ol>
+        <li><span class="step-num">6</span><span>You can sign and broadcast it.</span></li>
+      </ul>
     </div>
   </aside>
 </main>
 
 <footer>
-  © The Tuams Organization — <a class="glow-link" href="https://www.tuams.org/">https://www.tuams.org/</a> — <a class="glow-link" href="https://github.com/tuamsorg/tuams.org">2.22.73</a>
+  © The Tuams Organization — <a class="glow-link" href="https://www.tuams.org/">https://www.tuams.org/</a> — <a class="glow-link" href="https://github.com/tuamsorg/tuams.org">2.22.74</a>
 </footer>
 
 <script>
@@ -173,38 +178,53 @@ footer{padding:1.5rem clamp(1.2rem,5vw,4rem);color:#fff;font-size:.95rem;text-al
 //            jamais la position d'affichage (les "Available" passent en
 //            premier automatiquement).
 //   value:   le xpub lui-même.
-//   status:  "Available ✓"  → badge vert, montant + bouton PAY affichés.
-//            "Unavailable"  → badge rouge, pas de PAY.
+//   status:  "Available"    → badge vert, montant + bouton PAY affichés.
+//            "Assigned"  → badge rouge, pas de PAY.
 //   tx:      (optionnel) valeur copiable affichée sous le xpub, dès qu'elle
 //            est définie, quel que soit le statut.
 //
 // Exemples :
-//   { num: 1, value: "xpub...", status: "Available ✓" }
-//   { num: 2, value: "xpub...", status: "Unavailable", tx: "abcd...1234" }
+//   { num: 1, value: "xpub...", status: "Available" }
+//   { num: 2, value: "xpub...", status: "Assigned", tx: "abcd...1234" }
 // ==========================================================================
 const TUAMS_CONFIG = {
+  // Les 21 atolls des Tuamotu dotés d'un aérodrome civil desservis par Air Tahiti.
+  // lat/lon : centre approximatif de l'atoll, en degrés décimaux (sud et
+  // ouest négatifs). La carte se recadre automatiquement sur ces positions.
+  // Un atoll sans xpub (xpubs: []) apparaît en discret ; pour y ouvrir une
+  // clé "Available", renseigner aussi fee et postal (utilisé par refSats).
   atolls: [
-    { id: "manihi",  name: "Manihi",  x: 339, y: 120, r: 30, fee: "0.019", postal: 98771,
-      xpubs: [{ num: 1, value: "xpubJKDF98798DSF98_MANIHI", status: "Unavailable", tx: "0000000000000000000000000000000000000000000000000000000000dead" }] },
-    { id: "mataiva", name: "Mataiva", x: 100, y: 168, r: 22, fee: "0.018", postal: 98777,
-      xpubs: [{ num: 1, value: "xpub6C_D8S9F7S9DFD_MATA", status: "Available ✓" }] },
-    { id: "makemo",  name: "Makemo",  x: 556, y: 358, r: 40, fee: "0.017", postal: 98769,
-      xpubs: [{ num: 1, value: "xpub6C_DF89SD8F0SD9_MAKEMO", status: "Available ✓" }] },
-    { id: "anaa",    name: "Anaa",    x: 389, y: 439, r: 26, fee: "0.016", postal: 98760,
-      xpubs: [{ num: 1, value: "xpub6C_DSF89S9D8F0S_XPUB_ANAA", status: "Available ✓" }] },
-    { id: "hao",     name: "Hao",     x: 800, y: 520, r: 44, fee: "0.014", postal: 98767,
+    { id: "mataiva", name: "Mataiva", lat: -14.88, lon: -148.67, fee: "0.018", postal: 98777,
+      xpubs: [] },
+    { id: "tikehau", name: "Tikehau", lat: -15.00, lon: -148.17, xpubs: [] },
+    { id: "rangiroa", name: "Rangiroa", lat: -15.12, lon: -147.65, xpubs: [] },
+    { id: "arutua", name: "Arutua", lat: -15.25, lon: -146.75, xpubs: [] },
+    { id: "apataki", name: "Apataki", lat: -15.45, lon: -146.38, xpubs: [] },
+    { id: "ahe", name: "Ahe", lat: -14.50, lon: -146.33, xpubs: [] },
+    { id: "takaroa", name: "Takaroa", lat: -14.45, lon: -144.98, xpubs: [] },
+    { id: "fakarava", name: "Fakarava", lat: -16.30, lon: -145.62, xpubs: [] },
+    { id: "faaite", name: "Faaite", lat: -16.75, lon: -145.25, xpubs: [] },
+    { id: "anaa", name: "Anaa", lat: -17.40, lon: -145.50, fee: "0.016", postal: 98760,
+      xpubs: [] },
+    { id: "makemo", name: "Makemo", lat: -16.60, lon: -143.80, fee: "0.017", postal: 98769,
+      xpubs: [] },
+    { id: "takume", name: "Takume", lat: -15.80, lon: -142.20, xpubs: [] },
+    { id: "hikueru", name: "Hikueru", lat: -17.58, lon: -142.63, xpubs: [] },
+    { id: "napuka", name: "Napuka", lat: -14.17, lon: -141.25, fee: "0.015", postal: 98772,
       xpubs: [
-        { num: 2, value: "xpub6C_A1B2C3D4E5F6_XPUB_HAO_2", status: "Available ✓" },
-        { num: 1, value: "xpub6C_DSF87S09D78FS9D7_XPUB_HAO", status: "Unavailable", tx: "a1b2c3d4e5f6789012345678901234567890123456789012345678901234ab" },
+        { num: 1, value: "xpub6C_DSF879SD87FS_NAPUKA", status: "Assigned", tx: "f4184fc596403b9d638783cf57adfe4c75c605f6356fbc91338530e9831e9e16" },
+        { num: 2, value: "xpub6C_DSF879SD87FS_NAPUKA_2", status: "Assigned", tx: "2f4184fc596403b9d638783cf57adfe4c75c605f6356fbc91338530e9831e9e16" },
+        { num: 3, value: "xpub6C_DSF879SD87FS_NAPUKA_3", status: "Assigned", tx: "3f4184fc596403b9d638783cf57adfe4c75c605f6356fbc91338530e9831e9e16" },
+        { num: 4, value: "xpub6C_DSF879SD87FS_NAPUKA_4", status: "Available" },
       ] },
-    { id: "napuka",  name: "Napuka",  x: 775, y: 90,  r: 22, fee: "0.015", postal: 98772,
-      xpubs: [
-        { num: 1, value: "xpub6C_DSF879SD87FS_NAPUKA", status: "Unavailable", tx: "f4184fc596403b9d638783cf57adfe4c75c605f6356fbc91338530e9831e9e16" },
-        { num: 2, value: "xpub6C_DSF879SD87FS_NAPUKA_2", status: "Unavailable", tx: "2f4184fc596403b9d638783cf57adfe4c75c605f6356fbc91338530e9831e9e16" },
-        { num: 3, value: "xpub6C_DSF879SD87FS_NAPUKA_3", status: "Unavailable", tx: "3f4184fc596403b9d638783cf57adfe4c75c605f6356fbc91338530e9831e9e16" },
-        { num: 4, value: "xpub6C_DSF879SD87FS_NAPUKA_4", status: "Unavailable", tx: "4f4184fc596403b9d638783cf57adfe4c75c605f6356fbc91338530e9831e9e16" },
-        { num: 5, value: "xpub6C_DSF879SD87FS_NAPUKA_5", status: "Unavailable", tx: "5f4184fc596403b9d638783cf57adfe4c75c605f6356fbc91338530e9831e9e16" },
-      ] },
+    { id: "fakahina", name: "Fakahina", lat: -15.98, lon: -140.15, xpubs: [] },
+    { id: "puka-puka", name: "Puka Puka", lat: -14.83, lon: -138.83, xpubs: [] },
+    { id: "hao", name: "Hao", lat: -18.20, lon: -140.90, fee: "0.014", postal: 98767,
+      xpubs: [] },
+    { id: "tatakoto", name: "Tatakoto", lat: -17.33, lon: -138.40, xpubs: [] },
+    { id: "nukutavake", name: "Nukutavake", lat: -19.28, lon: -138.78, xpubs: [] },
+    { id: "reao", name: "Reao", lat: -18.50, lon: -136.40, xpubs: [] },
+    { id: "tureia", name: "Tureia", lat: -20.80, lon: -138.55, xpubs: [] },
   ],
 };
 
@@ -243,23 +263,64 @@ function svgEl(tag, attrs){
   return el;
 }
 
+// --- Projection géographique ----------------------------------------------
+// Équirectangulaire corrigée par cos(latitude moyenne), ajustée au viewBox
+// 900×600 avec une marge pour les noms.
+const VIEW_W = 900, VIEW_H = 600, MARGIN_X = 80, MARGIN_Y = 55;
+const PROJ = (() => {
+  const lats = TUAMS_CONFIG.atolls.map(a => a.lat), lons = TUAMS_CONFIG.atolls.map(a => a.lon);
+  const minLat = Math.min(...lats), maxLat = Math.max(...lats);
+  const minLon = Math.min(...lons), maxLon = Math.max(...lons);
+  const k = Math.cos(((minLat + maxLat) / 2) * Math.PI / 180);
+  const w = (maxLon - minLon) * k, h = maxLat - minLat;
+  const scale = Math.min((VIEW_W - 2 * MARGIN_X) / w, (VIEW_H - 2 * MARGIN_Y) / h);
+  const offX = (VIEW_W - w * scale) / 2, offY = (VIEW_H - h * scale) / 2;
+  const fn = a => ({ x: offX + (a.lon - minLon) * k * scale, y: offY + (maxLat - a.lat) * scale });
+  fn.pxPerKm = scale / 111.32; // 1° de latitude ≈ 111,32 km
+  return fn;
+})();
+
+// --- Cercles orange centrés sur Tahiti (Papeete) ---------------------------
+// Tahiti n'est pas affichée : elle sert seulement de centre. Un cercle tous
+// les RING_STEP_KM, jusqu'à englober l'atoll le plus éloigné.
+const TAHITI = { lat: -17.535, lon: -149.569 };
+const RING_STEP_KM = 200;
+(() => {
+  const c = PROJ(TAHITI);
+  const ringsGroup = document.getElementById("rings");
+  const maxPx = Math.max(...TUAMS_CONFIG.atolls.map(a => {
+    const q = PROJ(a); return Math.hypot(q.x - c.x, q.y - c.y);
+  }));
+  const stepPx = RING_STEP_KM * PROJ.pxPerKm;
+  for (let r = stepPx; r < maxPx + stepPx; r += stepPx) {
+    ringsGroup.appendChild(svgEl("circle", { class: "depth-line", cx: c.x, cy: c.y, r }));
+  }
+})();
+
 function createAtollMarker(atoll){
+  const { x, y } = PROJ(atoll);
+  const hasXpubs = atoll.xpubs.length > 0;
+  const r = hasXpubs ? 11 : 6;
   const g = svgEl("g", {
-    class: "atoll", "data-id": atoll.id, tabindex: "0",
+    class: "atoll" + (hasXpubs ? "" : " atoll--empty"), "data-id": atoll.id, tabindex: "0",
     role: "button", "aria-label": "Atoll " + atoll.name,
   });
-  const fill = svgEl("circle", { class: "lagoon-fill", cx: atoll.x, cy: atoll.y, r: atoll.r - 5 });
-  const ring = svgEl("circle", { class: "ring", cx: atoll.x, cy: atoll.y, r: atoll.r });
-  const label = svgEl("text", { x: atoll.x, y: atoll.y + atoll.r + 30, "text-anchor": "middle" });
+  const hit = svgEl("circle", { class: "hit", cx: x, cy: y, r: 14 });
+  const fill = svgEl("circle", { class: "lagoon-fill", cx: x, cy: y, r: Math.max(r - 3, 2) });
+  const ring = svgEl("circle", { class: "ring", cx: x, cy: y, r });
+  const label = svgEl("text", { x, y: y + r + 16, "text-anchor": "middle" });
   label.textContent = atoll.name;
 
-  g.append(fill, ring, label);
+  g.append(hit, fill, ring, label);
   g.addEventListener("click", () => selectAtoll(atoll.id));
   g.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") selectAtoll(atoll.id); });
   return g;
 }
 
-TUAMS_CONFIG.atolls.forEach(atoll => atollsGroup.appendChild(createAtollMarker(atoll)));
+// Atolls sans xpub dessinés d'abord, pour que ceux avec xpubs restent au-dessus.
+[...TUAMS_CONFIG.atolls]
+  .sort((a, b) => (a.xpubs.length > 0) - (b.xpubs.length > 0))
+  .forEach(atoll => atollsGroup.appendChild(createAtollMarker(atoll)));
 
 function selectAtoll(id){
   const g = document.querySelector(`.atoll[data-id="${id}"]`);
@@ -290,7 +351,7 @@ function renderSlot(atoll, xpub, displayIndex){
     const noiseSats = refSats(atoll, xpub);
     const totalBtc = satsToBtc(btcToSats(atoll.fee) + noiseSats);
     feeBlock = `
-      <div class="fee-note">Opening fees: ${totalBtc} BTC</div>`;
+      <div class="fee-note"><span>Opening = ${totalBtc} BTC</span><span>Travel ≈ 0.1 BTC</span></div>`;
     payBlock = `
       <div class="pay-block"><a class="psbt-btn" href="bitcoin:${MAIN_BTC_ADDRESS}?amount=${totalBtc}&label=${encodeURIComponent(label)}">PAY</a></div>`;
   }
@@ -305,6 +366,15 @@ function renderSlot(atoll, xpub, displayIndex){
 }
 
 function renderPanel(atoll){
+  if (atoll.xpubs.length === 0) {
+    panel.innerHTML = `
+      <div class="panel-header panel-header--first">
+        <h2 class="panel-title">${atoll.name}</h2>
+        <div class="status-note status-soon">Upcoming</div>
+      </div>
+    `;
+    return;
+  }
   // Les xpubs "Available" s'affichent en premier ; chacun garde son numéro
   // fixe (xpub.num) dans le titre, indépendant de sa position ici.
   const sorted = [...atoll.xpubs].sort((a, b) =>
