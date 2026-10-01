@@ -86,7 +86,24 @@ aside{padding:clamp(1.2rem,3vw,2rem);min-height:260px}
 
 .pay-block{text-align:center;margin-top:2.2rem}
 
-footer{padding:1.5rem clamp(1.2rem,5vw,4rem);color:#fff;font-size:.95rem;text-align:left}
+footer{
+  padding:1.5rem clamp(1.2rem,5vw,4rem) calc(1.5rem + env(safe-area-inset-bottom,0px));
+  color:#fff;font-size:.95rem;text-align:left;
+  background:#000;border-top:1px solid #fff;
+  position:sticky;bottom:0;z-index:2;
+}
+
+/* Desktop : la page tient dans l'écran, le footer reste fixe en bas et
+   seul le panneau de droite défile. Sur mobile (une colonne), toute la
+   page défile et le footer reste collé en bas grâce à position:sticky. */
+@media (min-width:881px){
+  body{display:flex;flex-direction:column;overflow:hidden}
+  header,footer{flex:none}
+  main{flex:1 1 auto;min-height:0}
+  .chart-wrap{min-height:0;display:flex;align-items:center;justify-content:center}
+  svg.chart{width:100%;height:100%;max-height:100%;aspect-ratio:auto}
+  aside{overflow-y:auto;min-height:0;overscroll-behavior:contain}
+}
 
 .onboarding-group{margin-bottom:1.8rem}
 .onboarding-group:last-child{margin-bottom:0}
