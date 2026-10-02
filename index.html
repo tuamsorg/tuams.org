@@ -59,7 +59,7 @@ aside{padding:var(--pad-y) var(--pad-panel);min-height:260px}
 
 /* ---- Carte ---- */
 .ring-km{fill:none;stroke:var(--orange);stroke-width:1}
-.logo-bg{fill:#000;stroke:var(--orange);stroke-width:1.5}
+.logo-bg{fill:#000}
 .atoll:focus{outline:none}
 .atoll .hit{fill:transparent}
 .atoll .bg{fill:#000}
@@ -149,7 +149,7 @@ aside.atoll-view>:last-child{margin-bottom:0}
       <p class="label">Signing</p>
       <ul class="steps">
         <li><span class="num">4</span><span>Send your <span class="glow" data-link="psbt">PSBT@tuams.org</span> <span class="glow" data-link="pgp">[PGP⇗]</span>.</span></li>
-        <li><span class="num">5</span><span>Pay the travel fees with your PROOF Bitcoin address.</span></li>
+        <li><span class="num">5</span><span>Pay the travel fees with your PROOF address.</span></li>
         <li><span class="num icon">✈︎</span><span>Tuams is leaving Tahiti for the atoll to sign and return your PSBT.</span></li>
         <li><span class="num">6</span><span>You can sign and broadcast it.</span></li>
       </ul>
@@ -180,7 +180,7 @@ aside.atoll-view>:last-child{margin-bottom:0}
    et "Assigned" sont discrets (nom visible au survol).
    ========================================================================== */
 const CONFIG = {
-  version: "2.22.102",                                    // footer — à monter à chaque modification
+  version: "2.22.105",                                    // footer — à monter à chaque modification
   btcAddress: "bc1qp6ejw8ptj9l9pkscmlf8fhhkrrjeawgpyjvtq8", // reçoit tous les paiements
   travelFee: "≈ 0.04 BTC",                                 // texte affiché à côté du montant d'ouverture
 
@@ -281,7 +281,7 @@ function svg(tag, attrs, parent){
   const step = CONFIG.map.ringStepKm * project.pxPerKm;
   for (let r = step; r < maxR; r += step) svg("circle", { class: "ring-km", cx: c.x, cy: c.y, r }, $("rings"));
 
-  // Logo au centre (à la place de Tahiti) : disque noir cerclé d'orange + image.
+  // Logo au centre (à la place de Tahiti) : disque noir + image.
   const { src, size } = CONFIG.map.logo, img = size;        // logo.svg a sa propre marge
   svg("circle", { class: "logo-bg", cx: c.x, cy: c.y, r: size / 2 }, $("logo"));
   svg("image", { href: src, x: c.x - img / 2, y: c.y - img / 2, width: img, height: img, "aria-label": "Tuams logo" }, $("logo"));
