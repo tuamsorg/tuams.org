@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>tuams.org</title>
 <meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="favicon.ico" sizes="32x32">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
 <style>
 :root{
   --orange:#F7931A; --green:#2ECC71; --red:#E74C3C; --teal:63,216,196;
@@ -12,7 +14,7 @@
   --pad-y:1.5rem; /* espace vertical identique de part et d'autre de la barre du footer */
 }
 *{box-sizing:border-box}
-html,body{margin:0;background:#000;color:#fff;font-family:monospace}
+html,body{margin:0;cursor:default;background:#000;color:#fff;font-family:monospace}
 html{height:100%}
 /* Page en colonne : header, main (prend toute la hauteur libre), footer. */
 body{min-height:100%;display:flex;flex-direction:column}
@@ -20,8 +22,7 @@ html{overflow-x:hidden}
 
 /* Liens : <span data-link> ouverts en JS (pas de <a href>, donc pas de bulle
    d'adresse du navigateur au survol). */
-[data-link]{cursor:pointer}
-[data-link]:focus:not(:focus-visible){outline:none}
+[data-link]:focus:not(:focus-visible),[data-href]:focus:not(:focus-visible){outline:none}
 .glow:hover{text-shadow:0 0 10px rgba(255,255,255,.8)}
 
 .btn{background:var(--orange);color:#000;border-radius:4px;padding:.55rem 1rem;font-weight:600;
@@ -58,9 +59,9 @@ aside{padding:var(--pad-y) var(--pad-panel);min-height:260px}
 
 /* ---- Carte ---- */
 .ring-km{fill:none;stroke:var(--orange);stroke-width:1}
-.atoll{cursor:pointer}
 .atoll:focus{outline:none}
 .atoll .hit{fill:transparent}
+.atoll .bg{fill:#000}
 .atoll .ring{fill:none;stroke:#fff;stroke-width:2.5;transition:stroke .18s}
 .atoll .lagoon{fill:rgba(var(--teal),.06);transition:fill .18s}
 .atoll:hover .lagoon,.atoll:focus-visible .lagoon{fill:rgba(var(--teal),.18)}
@@ -86,7 +87,7 @@ aside.atoll-view>:last-child{margin-bottom:0}
 .field{font-size:1rem;border:1px solid #fff;border-radius:4px;padding:.55rem .65rem;word-break:break-all;
   display:flex;justify-content:space-between;align-items:center;gap:.5rem}
 .field+.field{margin-top:.8rem}
-.field button{flex:none;background:none;border:none;color:#fff;font-size:.9rem;cursor:pointer;padding:.2rem .3rem}
+.field button{flex:none;background:none;border:none;color:#fff;font-size:.9rem;padding:.2rem .3rem}
 .fees{font-size:.95rem;margin-top:1rem;display:flex;justify-content:space-between;flex-wrap:wrap;gap:.3rem 1rem}
 .fees span:last-child{margin-left:auto}
 .pay{display:flex;justify-content:center;margin-top:2.2rem}
@@ -114,7 +115,7 @@ aside.atoll-view>:last-child{margin-bottom:0}
 
 <main>
   <div class="chart-wrap">
-    <svg class="chart" viewBox="0 0 900 600" role="img" aria-label="Stylized map of the Tuamotu">
+    <svg class="chart" viewBox="0 0 900 600" role="group" aria-label="Stylized map of the Tuamotu">
       <g id="rings" opacity="0.5"></g>
       <g id="atolls"></g>
     </svg>
@@ -145,7 +146,7 @@ aside.atoll-view>:last-child{margin-bottom:0}
 
       <p class="label">Signing</p>
       <ul class="steps">
-        <li><span class="num">4</span><span>Send your PSBT → <span class="glow" data-link="psbt">PSBT@tuams.org</span> <span class="glow" data-link="pgp">[PGP]</span>.</span></li>
+        <li><span class="num">4</span><span>Send your <span class="glow" data-link="psbt">PSBT@tuams.org</span> <span class="glow" data-link="pgp">[PGP⇗]</span>.</span></li>
         <li><span class="num">5</span><span>Pay the travel fees with your PROOF Bitcoin address.</span></li>
         <li><span class="num icon">✈︎</span><span>Tuams is leaving Tahiti for the atoll to sign and return your PSBT.</span></li>
         <li><span class="num">6</span><span>You can sign and broadcast it.</span></li>
@@ -177,7 +178,7 @@ aside.atoll-view>:last-child{margin-bottom:0}
    et "Assigned" sont discrets (nom visible au survol).
    ========================================================================== */
 const CONFIG = {
-  version: "2.22.85",                                     // footer — à monter à chaque modification
+  version: "2.22.101",                                     // footer — à monter à chaque modification
   btcAddress: "bc1qp6ejw8ptj9l9pkscmlf8fhhkrrjeawgpyjvtq8", // reçoit tous les paiements
   travelFee: "≈ 0.04 BTC",                                 // texte affiché à côté du montant d'ouverture
 
@@ -273,7 +274,7 @@ function svg(tag, attrs, parent){
   const c = project(CONFIG.map.center);
   const maxR = Math.max(...CONFIG.atolls.map(a => { const p = project(a); return Math.hypot(p.x - c.x, p.y - c.y); }));
   const step = CONFIG.map.ringStepKm * project.pxPerKm;
-  for (let r = step; r < maxR + step; r += step) svg("circle", { class: "ring-km", cx: c.x, cy: c.y, r }, $("rings"));
+  for (let r = step; r < maxR; r += step) svg("circle", { class: "ring-km", cx: c.x, cy: c.y, r }, $("rings"));
 }
 
 // Atolls (les discrets d'abord, pour que les "Available" restent au-dessus).
@@ -282,9 +283,10 @@ function svg(tag, attrs, parent){
   const r = isAvailable(atoll) ? 11 : 6;
   const g = svg("g", { class: "atoll" + (isAvailable(atoll) ? "" : " muted"), tabindex: 0, role: "button", "aria-label": "Atoll " + atoll.name }, $("atolls"));
   svg("circle", { class: "hit", cx: x, cy: y, r: 14 }, g);
+  svg("circle", { class: "bg", cx: x, cy: y, r }, g); // masque les arcs sous l'atoll
   svg("circle", { class: "lagoon", cx: x, cy: y, r: Math.max(r - 3, 2) }, g);
   svg("circle", { class: "ring", cx: x, cy: y, r }, g);
-  svg("text", { x, y: y + r + 16, "text-anchor": "middle" }, g).textContent = atoll.name;
+  svg("text", { x, y: y - r - 8, "text-anchor": "middle" }, g).textContent = atoll.name;
   atoll.el = g;
   g.addEventListener("click", () => select(atoll));
   g.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); select(atoll); } });
@@ -331,10 +333,9 @@ document.querySelectorAll("[data-link]").forEach(el => { el.tabIndex = 0; el.set
 document.addEventListener("click", e => {
   const copy = e.target.closest("[data-copy]");
   if (copy) {
-    navigator.clipboard.writeText(copy.dataset.copy).then(() => {
-      copy.textContent = "✓ OK";
-      setTimeout(() => copy.textContent = "COPY", 1200);
-    });
+    const flash = txt => { copy.textContent = txt; setTimeout(() => copy.textContent = "COPY", 1200); };
+    (navigator.clipboard ? navigator.clipboard.writeText(copy.dataset.copy) : Promise.reject())
+      .then(() => flash("✓ OK"), () => flash("✗ ERROR")); // presse-papiers refusé (page non sécurisée…)
     return;
   }
   const link = e.target.closest("[data-link],[data-href]");
