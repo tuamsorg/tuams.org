@@ -59,6 +59,7 @@ aside{padding:var(--pad-y) var(--pad-panel);min-height:260px}
 
 /* ---- Carte ---- */
 .ring-km{fill:none;stroke:var(--orange);stroke-width:1}
+.logo-bg{fill:#000;stroke:var(--orange);stroke-width:1.5}
 .atoll:focus{outline:none}
 .atoll .hit{fill:transparent}
 .atoll .bg{fill:#000}
@@ -117,6 +118,7 @@ aside.atoll-view>:last-child{margin-bottom:0}
   <div class="chart-wrap">
     <svg class="chart" viewBox="0 0 900 600" role="group" aria-label="Stylized map of the Tuamotu">
       <g id="rings" opacity="0.5"></g>
+      <g id="logo"></g>
       <g id="atolls"></g>
     </svg>
   </div>
@@ -178,7 +180,7 @@ aside.atoll-view>:last-child{margin-bottom:0}
    et "Assigned" sont discrets (nom visible au survol).
    ========================================================================== */
 const CONFIG = {
-  version: "2.22.101",                                     // footer — à monter à chaque modification
+  version: "2.22.102",                                    // footer — à monter à chaque modification
   btcAddress: "bc1qp6ejw8ptj9l9pkscmlf8fhhkrrjeawgpyjvtq8", // reçoit tous les paiements
   travelFee: "≈ 0.04 BTC",                                 // texte affiché à côté du montant d'ouverture
 
@@ -192,8 +194,9 @@ const CONFIG = {
   },
 
   map: {
-    center: { lat: -17.535, lon: -149.569 }, // Tahiti (Papeete) : centre des cercles, non affiché
+    center: { lat: -17.535, lon: -149.569 }, // Tahiti (Papeete) : centre des cercles, où s'affiche le logo
     ringStepKm: 200,                         // un cercle orange tous les N km
+    logo: { src: "logo.svg", size: 70 },     // logo au centre (fichier à côté d'index.html) ; size = diamètre du cercle
   },
 
   // 21 atolls des Tuamotu desservis par Air Tahiti.
@@ -248,10 +251,12 @@ function openingBtc(atoll){
 
 // --- Carte ------------------------------------------------------------------
 // Projection équirectangulaire (corrigée par cos de la latitude moyenne),
-// recadrée automatiquement sur les atolls dans le viewBox 900×600.
+// recadrée automatiquement sur les atolls + Tahiti (pour que le logo soit
+// entièrement visible) dans le viewBox 900×600.
 const project = (() => {
   const W = 900, H = 600, MX = 80, MY = 55;
-  const lats = CONFIG.atolls.map(a => a.lat), lons = CONFIG.atolls.map(a => a.lon);
+  const pts = [...CONFIG.atolls, CONFIG.map.center];
+  const lats = pts.map(a => a.lat), lons = pts.map(a => a.lon);
   const minLat = Math.min(...lats), maxLat = Math.max(...lats);
   const minLon = Math.min(...lons), maxLon = Math.max(...lons);
   const k = Math.cos((minLat + maxLat) / 2 * Math.PI / 180);
@@ -275,6 +280,11 @@ function svg(tag, attrs, parent){
   const maxR = Math.max(...CONFIG.atolls.map(a => { const p = project(a); return Math.hypot(p.x - c.x, p.y - c.y); }));
   const step = CONFIG.map.ringStepKm * project.pxPerKm;
   for (let r = step; r < maxR; r += step) svg("circle", { class: "ring-km", cx: c.x, cy: c.y, r }, $("rings"));
+
+  // Logo au centre (à la place de Tahiti) : disque noir cerclé d'orange + image.
+  const { src, size } = CONFIG.map.logo, img = size;        // logo.svg a sa propre marge
+  svg("circle", { class: "logo-bg", cx: c.x, cy: c.y, r: size / 2 }, $("logo"));
+  svg("image", { href: src, x: c.x - img / 2, y: c.y - img / 2, width: img, height: img, "aria-label": "Tuams logo" }, $("logo"));
 }
 
 // Atolls (les discrets d'abord, pour que les "Available" restent au-dessus).
