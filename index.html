@@ -102,8 +102,7 @@ aside.atoll-view>:last-child{margin-bottom:0}
   display:flex;justify-content:space-between;align-items:center;gap:.5rem}
 .field+.field{margin-top:.8rem}
 .field button{flex:none;background:none;border:none;color:#fff;font-size:var(--fs-sm);padding:.2rem .3rem}
-.fees{font-size:var(--fs);margin-top:1rem;display:flex;justify-content:space-between;flex-wrap:wrap;gap:.3rem 1rem}
-.fees span:last-child{margin-left:auto}
+.fees{font-size:var(--fs);margin-top:1rem}
 .pay{display:flex;justify-content:center;margin-top:2.2rem}
 
 /* ---- Panneau par défaut (explications) ---- */
@@ -115,6 +114,9 @@ aside.atoll-view>:last-child{margin-bottom:0}
 .num{flex:none;display:inline-flex;align-items:center;justify-content:center;width:1.6rem;height:1.6rem;
   border-radius:50%;border:1px solid #fff;font-size:var(--fs-sm);font-weight:700;line-height:1}
 .num.icon{border:none;font-size:var(--fs-lg)}
+/* Icône « télécharger » (flèche dans un plateau) */
+[data-download]{white-space:nowrap}
+.dl{width:1em;height:1em;vertical-align:-.12em;margin-left:.15em;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 </style>
 </head>
 <body>
@@ -161,7 +163,7 @@ aside.atoll-view>:last-child{margin-bottom:0}
 
       <p class="label">Signing</p>
       <ul class="steps">
-        <li><span class="num">4</span><span>Send your <span class="glow" data-link="psbt">PSBT@tuams.org</span> <span class="glow" data-link="pgp" data-download="tuams-pgp.asc" aria-label="Download PGP key">[PGP⤓]</span>.</span></li>
+        <li><span class="num">4</span><span>Send your <span class="glow" data-link="psbt">PSBT@tuams.org</span> <span class="glow" data-link="pgp" data-download="tuams-pgp.asc" aria-label="Download PGP key">[PGP<svg class="dl" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 15v4h14v-4"/></svg>]</span>.</span></li>
         <li><span class="num">5</span><span>Pay the travel fees with your PROOF address.</span></li>
         <li><span class="num icon">✈︎</span><span>Tuams is leaving Tahiti for the atoll to sign and return your PSBT.</span></li>
         <li><span class="num">6</span><span>You can sign and broadcast it.</span></li>
@@ -171,7 +173,7 @@ aside.atoll-view>:last-child{margin-bottom:0}
 </main>
 
 <footer>
-  © The Tuams Organization — <span class="glow" data-link="site">https://www.tuams.org/</span> — <span class="glow" data-link="repo" id="version"></span>
+  © The Tuams Organization — <span class="glow" data-link="site">https://www.tuams.org/</span> — <span class="glow" data-link="repo" id="version"></span> — <span id="travel"></span>
 </footer>
 
 <script>
@@ -193,9 +195,9 @@ aside.atoll-view>:last-child{margin-bottom:0}
    et "Assigned" sont discrets (nom visible au survol).
    ========================================================================== */
 const CONFIG = {
-  version: "2.22.116",                                    // footer — à monter à chaque modification
+  version: "2.22.119",                                    // footer — à monter à chaque modification
   btcAddress: "bc1qp6ejw8ptj9l9pkscmlf8fhhkrrjeawgpyjvtq8", // reçoit tous les paiements
-  travelFee: "≈ 0.04 BTC",                                 // texte affiché à côté du montant d'ouverture
+  travelFee: "≈ 0.04 BTC",                                 // affiché en bas de page, après la version
 
   links: {
     home: "/",
@@ -252,6 +254,7 @@ const statusOf = a => a.xpub ? a.xpub.status : "Upcoming";
 const isAvailable = a => statusOf(a) === "Available";
 
 $("version").textContent = CONFIG.version;
+$("travel").textContent = "Travel fees " + CONFIG.travelFee;
 
 // --- Montant d'ouverture --------------------------------------------------
 // Une seule adresse reçoit tous les paiements : on ajoute aux frais un
@@ -359,7 +362,7 @@ function atollHtml(atoll){
   if (s === "Available") {
     const btc = openingBtc(atoll);
     const uri = `bitcoin:${CONFIG.btcAddress}?amount=${btc}&label=${encodeURIComponent(atoll.name)}`;
-    html += `<div class="fees"><span>Opening = ${btc} BTC</span><span>Travel ${CONFIG.travelFee}</span></div>`
+    html += `<div class="fees">Opening fees = ${btc} BTC</div>`
           + `<div class="pay"><span class="btn" data-href="${uri}" role="link" tabindex="0">PAY</span></div>`;
   }
   return html;
