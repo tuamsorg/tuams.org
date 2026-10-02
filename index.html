@@ -6,146 +6,109 @@
 <title>tuams.org</title>
 <meta name="robots" content="noindex, nofollow">
 <style>
-*{box-sizing:border-box}
-html,body{margin:0;padding:0;background:#000;color:#fff;font-family:monospace;height:100%}
-html{width:100vw;overflow-x:hidden}
-
-.glow-link{color:#fff;text-decoration:none;text-shadow:none}
-.glow-link:hover{text-shadow:0 0 10px rgba(255,255,255,.8)}
-/* Liens en JavaScript (pas de <a href>) : le navigateur n'affiche plus
-   la bulle d'adresse en bas de fenêtre au survol. Voir openLink() en bas. */
-[data-href]{cursor:pointer;color:#fff;text-decoration:none}
-[data-href]:focus:not(:focus-visible){outline:none}
-
-header{padding:1.8rem clamp(1.2rem,5vw,4rem);border-bottom:1px solid #fff;display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap}
-header h1{font-size:clamp(1.6rem,3vw,2.3rem);margin:0;display:flex;align-items:center;gap:.6rem;flex-wrap:wrap}
-.header-actions{display:flex;align-items:center;gap:1.2rem;flex-wrap:wrap}
-.subscribe-outline{border:1px solid #fff;border-radius:20px;padding:.45rem .9rem;font-size:.85rem}
-
-.psbt-btn{
-  background:#F7931A;color:#000;border:none;border-radius:4px;
-  padding:.55rem 1rem;font-weight:600;text-decoration:none;font-family:monospace;
-  box-shadow:0 0 0 0 rgba(247,147,26,.45);
-  transition:box-shadow .18s ease,filter .18s ease;
+:root{
+  --orange:#F7931A; --green:#2ECC71; --red:#E74C3C; --teal:63,216,196;
+  --pad-x:clamp(1.2rem,5vw,4rem); --pad-panel:clamp(1.2rem,3vw,2rem);
+  --pad-y:1.5rem; /* espace vertical identique de part et d'autre de la barre du footer */
 }
-.psbt-btn:hover{filter:brightness(1.08);box-shadow:0 0 0 4px rgba(247,147,26,.35)}
+*{box-sizing:border-box}
+html,body{margin:0;background:#000;color:#fff;font-family:monospace}
+html{height:100%}
+/* Page en colonne : header, main (prend toute la hauteur libre), footer. */
+body{min-height:100%;display:flex;flex-direction:column}
+html{overflow-x:hidden}
 
-main{display:grid;grid-template-columns:minmax(0,2.2fr) minmax(300px,380px);min-height:calc(100% - 140px)}
+/* Liens : <span data-link> ouverts en JS (pas de <a href>, donc pas de bulle
+   d'adresse du navigateur au survol). */
+[data-link]{cursor:pointer}
+[data-link]:focus:not(:focus-visible){outline:none}
+.glow:hover{text-shadow:0 0 10px rgba(255,255,255,.8)}
+
+.btn{background:var(--orange);color:#000;border-radius:4px;padding:.55rem 1rem;font-weight:600;
+  transition:box-shadow .18s,filter .18s}
+.btn:hover{filter:brightness(1.08);box-shadow:0 0 0 4px rgba(247,147,26,.35)}
+
+/* ---- Header / footer ---- */
+header{padding:1.8rem var(--pad-x);border-bottom:1px solid #fff;display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap}
+header h1{font-size:clamp(1.6rem,3vw,2.3rem);margin:0}
+.header-actions{display:flex;align-items:center;gap:1.2rem;flex-wrap:wrap}
+.pill{border:1px solid #fff;border-radius:20px;padding:.45rem .9rem;font-size:.85rem}
+footer{padding:var(--pad-y) var(--pad-x) calc(var(--pad-y) + env(safe-area-inset-bottom,0px));font-size:.95rem;line-height:1.5;
+  background:#000;border-top:1px solid #fff;position:sticky;bottom:0;z-index:2}
+
+/* ---- Layout : carte + panneau ---- */
+main{flex:1 0 auto;display:grid;grid-template-columns:minmax(0,2.2fr) minmax(300px,380px)}
+.chart-wrap{padding:clamp(1rem,3vw,2.2rem);border-right:1px solid #fff}
+svg.chart{width:100%;height:auto;display:block;aspect-ratio:900/600}
+aside{padding:var(--pad-y) var(--pad-panel);min-height:260px}
+
+/* Desktop : la page tient dans l'écran, seul le panneau défile. */
+@media (min-width:881px){
+  body{height:100%;overflow:hidden}
+  main{flex:1 1 0;min-height:0}
+  .chart-wrap{min-height:0;display:flex;align-items:center;justify-content:center}
+  svg.chart{height:100%;aspect-ratio:auto}
+  aside{overflow-y:auto;min-height:0;overscroll-behavior:contain}
+}
+/* Mobile : une colonne ; la ligne 1fr donne au panneau la hauteur restante. */
 @media (max-width:880px){
-  /* align-content:start évite que la grille étire les 2 lignes (carte +
-     panneau) quand le contenu est plus court que min-height, ce qui
-     décalerait le titre du panneau vers le bas selon l'atoll affiché. */
   main{grid-template-columns:1fr;grid-template-rows:auto 1fr;align-content:start}
   .chart-wrap{border-right:none;border-bottom:1px solid #fff}
 }
 
-.chart-wrap{padding:clamp(1rem,3vw,2.2rem);border-right:1px solid #fff}
-
-svg.chart{width:100%;height:auto;display:block;aspect-ratio:900/600}
-.depth-line{fill:none;stroke:#F7931A;stroke-width:1}
+/* ---- Carte ---- */
+.ring-km{fill:none;stroke:var(--orange);stroke-width:1}
 .atoll{cursor:pointer}
-.atoll .hit{fill:transparent}
-.atoll .ring{fill:none;stroke:#fff;stroke-width:2.5;transition:stroke .18s ease}
-.atoll .lagoon-fill{fill:rgba(63,216,196,.06);transition:fill .18s ease}
-.atoll:hover .lagoon-fill,.atoll:focus-visible .lagoon-fill{fill:rgba(63,216,196,.18)}
-.atoll.active .lagoon-fill{fill:#F7931A}
-.atoll.active .ring{stroke:#F7931A}
-.atoll text{fill:#fff;font-size:15px;pointer-events:none;stroke:#000;stroke-width:4px;paint-order:stroke}
 .atoll:focus{outline:none}
-/* Atolls avec piste mais sans xpub : discrets, nom visible au survol/focus. */
-.atoll--empty .ring{stroke:rgba(255,255,255,.5);stroke-width:1.5}
-.atoll--empty text{opacity:0;transition:opacity .15s ease}
-.atoll--empty:hover text,.atoll--empty:focus-visible text,.atoll--empty.active text{opacity:1}
+.atoll .hit{fill:transparent}
+.atoll .ring{fill:none;stroke:#fff;stroke-width:2.5;transition:stroke .18s}
+.atoll .lagoon{fill:rgba(var(--teal),.06);transition:fill .18s}
+.atoll:hover .lagoon,.atoll:focus-visible .lagoon{fill:rgba(var(--teal),.18)}
+.atoll text{fill:#fff;font-size:15px;pointer-events:none;stroke:#000;stroke-width:4px;paint-order:stroke}
+/* Atolls non disponibles (Upcoming / Assigned) : discrets, nom au survol. */
+.atoll.muted .ring{stroke:rgba(255,255,255,.5);stroke-width:1.5}
+.atoll.muted text{opacity:0;transition:opacity .15s}
+.atoll.muted:hover text,.atoll.muted:focus-visible text,.atoll.muted.active text{opacity:1}
+.atoll.active .lagoon{fill:var(--orange)}
+.atoll.active .ring{stroke:var(--orange)}
 @media (max-width:880px){ .atoll text{font-size:26px;stroke-width:6px} }
 
-aside{padding:clamp(1.2rem,3vw,2rem);min-height:260px}
-/* Panneau d'un atoll sélectionné : contenu centré verticalement, pour un
-   espace identique entre la barre du haut et le titre, et entre le bas du
-   contenu (PAY) et la barre du bas. Sur mobile, la ligne 1fr de la grille
-   donne au panneau toute la hauteur restante jusqu'au footer. */
-aside.aside--atoll{display:flex;flex-direction:column;justify-content:center}
-aside.aside--atoll > *{flex:none}
-.panel-header .panel-title{margin:0}
+/* ---- Panneau d'un atoll (centré verticalement) ---- */
+aside.atoll-view{display:flex;flex-direction:column;justify-content:center}
+aside.atoll-view>*{flex:none}
+aside.atoll-view>:last-child{margin-bottom:0}
+.panel-head{display:flex;justify-content:space-between;align-items:center;gap:.75rem;margin-bottom:1.5rem}
+.panel-head h2{margin:0}
+.badge{display:inline-flex;align-items:center;height:1.9rem;line-height:1;padding:0 .6rem;border-radius:20px;font-size:.9rem;font-weight:700;border:1px solid}
+.badge.available{color:var(--green);background:rgba(46,204,113,.15)}
+.badge.assigned{color:var(--red);background:rgba(231,76,60,.15)}
+.badge.upcoming{color:var(--orange);background:rgba(247,147,26,.15)}
+.field{font-size:1rem;border:1px solid #fff;border-radius:4px;padding:.55rem .65rem;word-break:break-all;
+  display:flex;justify-content:space-between;align-items:center;gap:.5rem}
+.field+.field{margin-top:.8rem}
+.field button{flex:none;background:none;border:none;color:#fff;font-size:.9rem;cursor:pointer;padding:.2rem .3rem}
+.fees{font-size:.95rem;margin-top:1rem;display:flex;justify-content:space-between;flex-wrap:wrap;gap:.3rem 1rem}
+.fees span:last-child{margin-left:auto}
+.pay{display:flex;justify-content:center;margin-top:2.2rem}
 
-.panel-header{display:flex;justify-content:space-between;align-items:center;gap:.75rem;margin-bottom:1.5rem;padding-top:1.5rem}
-/* Le bloc d'en-tête du panneau atoll n'a pas de padding-top. */
-.panel-header.panel-header--first{padding-top:0}
-
-.field-value{
-  font-size:1rem;background:#000;border:1px solid #fff;border-radius:4px;
-  padding:.55rem .65rem;word-break:break-all;color:#fff;
-  display:flex;justify-content:space-between;align-items:center;gap:.5rem;
-}
-.field-value + .field-value{margin-top:.8rem}
-.field-value button{flex:none;background:none;border:none;color:#fff;font-size:.9rem;cursor:pointer;padding:.2rem .3rem}
-.fee-note{font-size:.95rem;color:#fff;margin-top:1rem;display:flex;justify-content:space-between;flex-wrap:wrap;gap:.3rem 1rem}
-.fee-note span:last-child{margin-left:auto;text-align:right}
-
-/* Le badge Testnet du header réutilise ces mêmes classes (status-note
-   status-down) pour rester visuellement identique au badge Assigned. */
-.status-note{
-  display:inline-flex;align-items:center;justify-content:center;
-  height:1.9rem;overflow:hidden;line-height:1;
-  font-size:.9rem;font-weight:700;
-  padding:0 .6rem;border-radius:20px;
-}
-.status-note.status-ok{background:rgba(46,204,113,.15);color:#2ECC71;border:1px solid #2ECC71}
-.status-note.status-down{background:rgba(231,76,60,.15);color:#E74C3C;border:1px solid #E74C3C}
-.status-note.status-soon{background:rgba(247,147,26,.15);color:#F7931A;border:1px solid #F7931A}
-
-.pay-block{display:flex;justify-content:center;margin-top:2.2rem}
-
-footer{
-  padding:1.5rem clamp(1.2rem,5vw,4rem) calc(1.5rem + env(safe-area-inset-bottom,0px));
-  color:#fff;font-size:.95rem;text-align:left;
-  background:#000;border-top:1px solid #fff;
-  position:sticky;bottom:0;z-index:2;
-}
-
-/* Desktop : la page tient dans l'écran, le footer reste fixe en bas et
-   seul le panneau de droite défile. Sur mobile (une colonne), toute la
-   page défile et le footer reste collé en bas grâce à position:sticky. */
-@media (min-width:881px){
-  body{display:flex;flex-direction:column;overflow:hidden}
-  header,footer{flex:none}
-  main{flex:1 1 auto;min-height:0}
-  .chart-wrap{min-height:0;display:flex;align-items:center;justify-content:center}
-  svg.chart{width:100%;height:100%;max-height:100%;aspect-ratio:auto}
-  aside{overflow-y:auto;min-height:0;overscroll-behavior:contain}
-}
-
-.onboarding-group{margin-bottom:1.8rem}
-.onboarding-group:last-child{margin-bottom:0}
-
-.onboarding-label{
-  color:#fff;text-transform:uppercase;font-weight:700;
-  font-size:1.05rem;letter-spacing:.05em;margin:1.5rem 0 1.3rem;
-}
-
-.onboarding{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:.9rem}
-.onboarding li{display:flex;align-items:center;gap:.7rem;font-size:.95rem;line-height:1.5;color:#fff}
-
-.step-num{
-  flex:none;display:inline-flex;align-items:center;justify-content:center;
-  width:1.6rem;height:1.6rem;border-radius:50%;
-  border:1px solid #fff;color:#fff;
-  font-size:.8rem;font-weight:700;line-height:1;
-}
-.step-num--icon{border:none;font-size:1.1rem}
-
-.onboarding-text{margin:0 0 1rem;color:#fff;font-size:.95rem;line-height:1.6}
-.onboarding-text:last-child{margin-bottom:0}
-
-.panel-title--gap{margin-bottom:1.2rem}
+/* ---- Panneau par défaut (explications) ---- */
+.intro h2{margin-bottom:1.2rem}
+.intro p{margin:0 0 1rem;font-size:.95rem;line-height:1.6}
+.intro .label{text-transform:uppercase;font-weight:700;font-size:1.05rem;letter-spacing:.05em;margin:1.5rem 0 1.3rem;line-height:normal}
+.steps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:.9rem}
+.steps li{display:flex;align-items:center;gap:.7rem;font-size:.95rem;line-height:1.5}
+.num{flex:none;display:inline-flex;align-items:center;justify-content:center;width:1.6rem;height:1.6rem;
+  border-radius:50%;border:1px solid #fff;font-size:.8rem;font-weight:700;line-height:1}
+.num.icon{border:none;font-size:1.1rem}
 </style>
 </head>
 <body>
 
 <header>
-  <h1><span class="glow-link" data-href="/" role="link" tabindex="0">tuams.org</span></h1>
+  <h1><span class="glow" data-link="home">tuams.org</span></h1>
   <span class="header-actions">
-    <span class="glow-link subscribe-outline" data-href="https://x.com/tuamsorg" aria-label="Subscribe to notifications on X, @tuamsorg" role="link" tabindex="0">Subscribe to X.com notifications: @tuamsorg</span>
-    <span class="psbt-btn" data-href="mailto:PSBT@tuams.org" role="link" tabindex="0">PSBT</span>
+    <span class="glow pill" data-link="x">Subscribe to X.com notifications: @tuamsorg</span>
+    <span class="btn" data-link="psbt">PSBT</span>
   </span>
 </header>
 
@@ -158,272 +121,232 @@ footer{
   </div>
 
   <aside id="panel">
-    <h2 class="panel-title panel-title--gap">Why?</h2>
-    <p class="onboarding-text">Tuams introduces a new dimension in Bitcoin security: Geography.</p>
-    <p class="onboarding-text">French Polynesia has one of the largest sets of atolls in the world: the Tuamotu — nicknamed Tuams.</p>
-    <p class="onboarding-label">Generation</p>
-    <p class="onboarding-text">A Trezor Safe 5 (Seedless, MicroSD Card Encryption) is deposited on an atoll.</p>
-    <p class="onboarding-text">The MicroSD needed to use it is kept in Tahiti.</p>
+    <div class="intro">
+      <h2>Why?</h2>
+      <p>Tuams introduces a new dimension in Bitcoin security: Geography.</p>
+      <p>French Polynesia has one of the largest sets of atolls in the world: the Tuamotu — nicknamed Tuams.</p>
 
-    <div class="onboarding-group">
-      <p class="onboarding-label">Opening</p>
-      <ul class="onboarding">
-        <li><span class="step-num">1</span><span>Select an available atoll on the map.</span></li>
-        <li><span class="step-num">2</span><span>Pay the opening fees with a Bitcoin address that you own.</span></li>
-        <li><span class="step-num step-num--icon">⚷︎</span><span>Now your sending address becomes your PROOF address.</span></li>
-      </ul>
-      <p class="onboarding-label">Integration</p>
-      <ul class="onboarding">
-        <li><span class="step-num">3</span><span>Integrate the xpub into the architecture of your choice.</span></li>
-        <li><span class="step-num step-num--icon">⚠︎</span><span>Plan for an independent recovery method.</span></li>
-      </ul>
-    </div>
+      <p class="label">Generation</p>
+      <p>A Trezor Safe 5 (Seedless, MicroSD Card Encryption) is deposited on an atoll.</p>
+      <p>The MicroSD needed to use it is kept in Tahiti.</p>
 
-    <div class="onboarding-group">
-      <p class="onboarding-label">Signing</p>
-      <ul class="onboarding">
-        <li><span class="step-num">4</span><span>Send your PSBT → <span class="glow-link" data-href="mailto:PSBT@tuams.org" role="link" tabindex="0">PSBT@tuams.org</span> <span class="glow-link" data-href="pgp.asc" role="link" tabindex="0">[PGP]</span>.</span></li>
-        <li><span class="step-num">5</span><span>Pay the travel fees with your PROOF Bitcoin address.</span></li>
-        <li><span class="step-num step-num--icon">✈︎</span><span>Tuams is leaving Tahiti for the atoll to sign and return your PSBT.</span></li>
-        <li><span class="step-num">6</span><span>You can sign and broadcast it.</span></li>
+      <p class="label">Opening</p>
+      <ul class="steps">
+        <li><span class="num">1</span><span>Select an available atoll on the map.</span></li>
+        <li><span class="num">2</span><span>Pay the opening fees with a Bitcoin address that you own.</span></li>
+        <li><span class="num icon">⚷︎</span><span>Now your sending address becomes your PROOF address.</span></li>
+      </ul>
+
+      <p class="label">Integration</p>
+      <ul class="steps">
+        <li><span class="num">3</span><span>Integrate the xpub into the architecture of your choice.</span></li>
+        <li><span class="num icon">⚠︎</span><span>Plan for an independent recovery method.</span></li>
+      </ul>
+
+      <p class="label">Signing</p>
+      <ul class="steps">
+        <li><span class="num">4</span><span>Send your PSBT → <span class="glow" data-link="psbt">PSBT@tuams.org</span> <span class="glow" data-link="pgp">[PGP]</span>.</span></li>
+        <li><span class="num">5</span><span>Pay the travel fees with your PROOF Bitcoin address.</span></li>
+        <li><span class="num icon">✈︎</span><span>Tuams is leaving Tahiti for the atoll to sign and return your PSBT.</span></li>
+        <li><span class="num">6</span><span>You can sign and broadcast it.</span></li>
       </ul>
     </div>
   </aside>
 </main>
 
 <footer>
-  © The Tuams Organization — <span class="glow-link" data-href="https://www.tuams.org/" role="link" tabindex="0">https://www.tuams.org/</span> — <span class="glow-link" data-href="https://github.com/tuamsorg/tuams.org" role="link" tabindex="0">2.22.79</span>
+  © The Tuams Organization — <span class="glow" data-link="site">https://www.tuams.org/</span> — <span class="glow" data-link="repo" id="version"></span>
 </footer>
 
 <script>
-// ==========================================================================
-// ÉDITION RAPIDE — une seule xpub par atoll, dans le champ xpub: { ... }.
-// Champs de l'xpub :
-//
-//   value:   le xpub lui-même.
-//   status:  "Available" → badge vert, montant + bouton PAY affichés.
-//            "Assigned"  → badge rouge, pas de PAY.
-//   tx:      (optionnel) valeur copiable affichée sous le xpub, dès qu'elle
-//            est définie, quel que soit le statut.
-//
-// Exemples :
-//   xpub: { value: "xpub...", status: "Available" }
-//   xpub: { value: "xpub...", status: "Assigned", tx: "abcd...1234" }
-// Atoll sans xpub : omettre le champ xpub (affiché "Upcoming").
-// ==========================================================================
-const TUAMS_CONFIG = {
-  // Les 21 atolls des Tuamotu dotés d'un aérodrome civil desservis par Air Tahiti.
-  // lat/lon : centre approximatif de l'atoll, en degrés décimaux (sud et
-  // ouest négatifs). La carte se recadre automatiquement sur ces positions.
-  // Un atoll sans xpub apparaît en discret ; pour y ouvrir une clé
-  // "Available", renseigner aussi fee et postal (utilisé par refSats).
+/* ==========================================================================
+   CONFIG — tout ce qui se modifie à la main est ici.
+   ==========================================================================
+
+   ATOLLS — un objet par atoll :
+     name      nom affiché
+     lat, lon  centre de l'atoll (degrés décimaux, sud et ouest négatifs)
+     fee       frais d'ouverture en BTC (obligatoire si xpub "Available")
+     postal    code postal (ses 2 derniers chiffres = sats de référence)
+     xpub      (optionnel) UNE seule xpub par atoll :
+                 { value: "xpub…", status: "Available" }
+                 { value: "xpub…", status: "Assigned", tx: "txid…" }
+               Sans xpub → l'atoll s'affiche "Upcoming".
+
+   Sur la carte, seuls les atolls "Available" sont mis en avant ; "Upcoming"
+   et "Assigned" sont discrets (nom visible au survol).
+   ========================================================================== */
+const CONFIG = {
+  version: "2.22.84",                                     // footer — à monter à chaque modification
+  btcAddress: "bc1qp6ejw8ptj9l9pkscmlf8fhhkrrjeawgpyjvtq8", // reçoit tous les paiements
+  travelFee: "≈ 0.1 BTC",                                 // texte affiché à côté du montant d'ouverture
+
+  links: {
+    home: "/",
+    x:    "https://x.com/tuamsorg",
+    psbt: "mailto:PSBT@tuams.org",
+    pgp:  "pgp.asc",
+    site: "https://www.tuams.org/",
+    repo: "https://github.com/tuamsorg/tuams.org",
+  },
+
+  map: {
+    center: { lat: -17.535, lon: -149.569 }, // Tahiti (Papeete) : centre des cercles, non affiché
+    ringStepKm: 200,                         // un cercle orange tous les N km
+  },
+
+  // 21 atolls des Tuamotu desservis par Air Tahiti.
+  // fee: "404" = frais pas encore fixés (à remplacer avant de passer un atoll en "Available").
   atolls: [
-    { id: "mataiva", name: "Mataiva", lat: -14.88, lon: -148.67, fee: "0.018", postal: 98777 },
-    { id: "tikehau", name: "Tikehau", lat: -15.00, lon: -148.17 },
-    { id: "rangiroa", name: "Rangiroa", lat: -15.12, lon: -147.65 },
-    { id: "arutua", name: "Arutua", lat: -15.25, lon: -146.75 },
-    { id: "apataki", name: "Apataki", lat: -15.45, lon: -146.38 },
-    { id: "ahe", name: "Ahe", lat: -14.50, lon: -146.33 },
-    { id: "takaroa", name: "Takaroa", lat: -14.45, lon: -144.98 },
-    { id: "fakarava", name: "Fakarava", lat: -16.30, lon: -145.62 },
-    { id: "faaite", name: "Faaite", lat: -16.75, lon: -145.25 },
-    { id: "anaa", name: "Anaa", lat: -17.40, lon: -145.50, fee: "0.016", postal: 98760 },
-    { id: "makemo", name: "Makemo", lat: -16.60, lon: -143.80, fee: "0.017", postal: 98769 },
-    { id: "takume", name: "Takume", lat: -15.80, lon: -142.20 },
-    { id: "hikueru", name: "Hikueru", lat: -17.58, lon: -142.63 },
-    { id: "napuka", name: "Napuka", lat: -14.17, lon: -141.25, fee: "0.015", postal: 98772,
-      xpub: { value: "xpub6C_DSF879SD87FS_NAPUKA", status: "Assigned", tx: "f4184fc596403b9d638783cf57adfe4c75c605f6356fbc91338530e9831e9e16" } },
-    { id: "fakahina", name: "Fakahina", lat: -15.98, lon: -140.15 },
-    { id: "puka-puka", name: "Puka Puka", lat: -14.83, lon: -138.83 },
-    { id: "hao", name: "Hao", lat: -18.20, lon: -140.90, fee: "0.014", postal: 98767,
+    { name: "Mataiva",    lat: -14.88, lon: -148.67, fee: "0.018", postal: 98777 },
+    { name: "Tikehau",    lat: -15.00, lon: -148.17, fee: "404",   postal: 98778 },
+    { name: "Rangiroa",   lat: -15.12, lon: -147.65, fee: "404",   postal: 98775 }, // Avatoru (Tiputa = 98776)
+    { name: "Arutua",     lat: -15.25, lon: -146.75, fee: "404",   postal: 98761 },
+    { name: "Apataki",    lat: -15.45, lon: -146.38, fee: "404",   postal: 98762 },
+    { name: "Ahe",        lat: -14.50, lon: -146.33, fee: "404",   postal: 98770 },
+    { name: "Takaroa",    lat: -14.45, lon: -144.98, fee: "404",   postal: 98781 },
+    { name: "Fakarava",   lat: -16.30, lon: -145.62, fee: "404",   postal: 98763 },
+    { name: "Faaite",     lat: -16.75, lon: -145.25, fee: "404",   postal: 98786 },
+    { name: "Anaa",       lat: -17.40, lon: -145.50, fee: "0.016", postal: 98760 },
+    { name: "Makemo",     lat: -16.60, lon: -143.80, fee: "0.017", postal: 98769 },
+    { name: "Takume",     lat: -15.80, lon: -142.20, fee: "404",   postal: 98790 }, // à vérifier
+    { name: "Hikueru",    lat: -17.58, lon: -142.63, fee: "404",   postal: 98768 },
+    { name: "Napuka",     lat: -14.17, lon: -141.25, fee: "0.015", postal: 98772,
+      xpub: { value: "xpub6C_DSF879SD87FS_NAPUKA", status: "Assigned",
+              tx: "f4184fc596403b9d638783cf57adfe4c75c605f6356fbc91338530e9831e9e16" } },
+    { name: "Fakahina",   lat: -15.98, lon: -140.15, fee: "404",   postal: 98766 },
+    { name: "Puka Puka",  lat: -14.83, lon: -138.83, fee: "404",   postal: 98774 },
+    { name: "Hao",        lat: -18.20, lon: -140.90, fee: "0.014", postal: 98767,
       xpub: { value: "test", status: "Available" } },
-    { id: "tatakoto", name: "Tatakoto", lat: -17.33, lon: -138.40 },
-    { id: "nukutavake", name: "Nukutavake", lat: -19.28, lon: -138.78 },
-    { id: "reao", name: "Reao", lat: -18.50, lon: -136.40 },
-    { id: "tureia", name: "Tureia", lat: -20.80, lon: -138.55 },
+    { name: "Tatakoto",   lat: -17.33, lon: -138.40, fee: "404",   postal: 98783 },
+    { name: "Nukutavake", lat: -19.28, lon: -138.78, fee: "404",   postal: 98773 },
+    { name: "Reao",       lat: -18.50, lon: -136.40, fee: "404",   postal: 98779 },
+    { name: "Tureia",     lat: -20.80, lon: -138.55, fee: "404",   postal: 98784 },
   ],
 };
+/* ======================== FIN DE LA CONFIG ================================ */
 
-const MAIN_BTC_ADDRESS = "bc1qp6ejw8ptj9l9pkscmlf8fhhkrrjeawgpyjvtq8";
-const svgNS = "http://www.w3.org/2000/svg";
-const atollsGroup = document.getElementById("atolls");
-const panel = document.getElementById("panel");
-// Contenu par défaut (Why/Generation/Opening/Integration/Signing), affiché
-// tant qu'aucun atoll n'est sélectionné et restauré si on désélectionne.
-const DEFAULT_PANEL_HTML = panel.innerHTML;
 
-// --- Sats de référence (fixes, déterministes) ---------------------------
-// Le site étant statique (pas de backend), une seule adresse BTC reçoit
-// tous les paiements : on ne peut donc pas relier un paiement à un client
-// via l'adresse elle-même. On ajoute au montant de base un supplément fixe
-// en sats = 2 derniers chiffres du code postal de l'atoll (une seule xpub
-// par atoll). Ex: Hao (98767) → 67 sats.
-// Déterministe : calculable à l'avance pour chaque xpub, sans dépendre
-// d'une communication du client. Reste une empreinte pratique, pas une
-// preuve cryptographique (la formule est visible dans ce code source) :
-// n'importe qui peut recalculer ce montant et payer pour le même xpub.
-// Politique affichée au client : premier payé, premier servi — en cas de
-// paiements multiples sur un même xpub, les paiements surnuméraires sont
-// remboursés (traitement manuel, hors site, basé sur l'horodatage on-chain).
-function btcToSats(btc){ return Math.round(parseFloat(btc) * 1e8); }
-function satsToBtc(sats){ return (sats / 1e8).toFixed(8); }
-function refSats(atoll){
-  return atoll.postal % 100;
+const $ = id => document.getElementById(id);
+const panel = $("panel");
+const INTRO_HTML = panel.innerHTML;
+const statusOf = a => a.xpub ? a.xpub.status : "Upcoming";
+const isAvailable = a => statusOf(a) === "Available";
+
+$("version").textContent = CONFIG.version;
+
+// --- Montant d'ouverture --------------------------------------------------
+// Une seule adresse reçoit tous les paiements : on ajoute aux frais un
+// supplément en sats = 2 derniers chiffres du code postal (ex. Hao 98767 →
+// 67 sats) pour reconnaître l'atoll payé. Empreinte pratique, pas une preuve
+// (formule publique) : premier payé, premier servi, surplus remboursés.
+function openingBtc(atoll){
+  const sats = Math.round(parseFloat(atoll.fee) * 1e8) + atoll.postal % 100;
+  return (sats / 1e8).toFixed(8);
 }
 
-function svgEl(tag, attrs){
-  const el = document.createElementNS(svgNS, tag);
-  for (const key in attrs) el.setAttribute(key, attrs[key]);
-  return el;
-}
-
-// --- Projection géographique ----------------------------------------------
-// Équirectangulaire corrigée par cos(latitude moyenne), ajustée au viewBox
-// 900×600 avec une marge pour les noms.
-const VIEW_W = 900, VIEW_H = 600, MARGIN_X = 80, MARGIN_Y = 55;
-const PROJ = (() => {
-  const lats = TUAMS_CONFIG.atolls.map(a => a.lat), lons = TUAMS_CONFIG.atolls.map(a => a.lon);
+// --- Carte ------------------------------------------------------------------
+// Projection équirectangulaire (corrigée par cos de la latitude moyenne),
+// recadrée automatiquement sur les atolls dans le viewBox 900×600.
+const project = (() => {
+  const W = 900, H = 600, MX = 80, MY = 55;
+  const lats = CONFIG.atolls.map(a => a.lat), lons = CONFIG.atolls.map(a => a.lon);
   const minLat = Math.min(...lats), maxLat = Math.max(...lats);
   const minLon = Math.min(...lons), maxLon = Math.max(...lons);
-  const k = Math.cos(((minLat + maxLat) / 2) * Math.PI / 180);
-  const w = (maxLon - minLon) * k, h = maxLat - minLat;
-  const scale = Math.min((VIEW_W - 2 * MARGIN_X) / w, (VIEW_H - 2 * MARGIN_Y) / h);
-  const offX = (VIEW_W - w * scale) / 2, offY = (VIEW_H - h * scale) / 2;
-  const fn = a => ({ x: offX + (a.lon - minLon) * k * scale, y: offY + (maxLat - a.lat) * scale });
+  const k = Math.cos((minLat + maxLat) / 2 * Math.PI / 180);
+  const scale = Math.min((W - 2 * MX) / ((maxLon - minLon) * k), (H - 2 * MY) / (maxLat - minLat));
+  const offX = (W - (maxLon - minLon) * k * scale) / 2, offY = (H - (maxLat - minLat) * scale) / 2;
+  const fn = p => ({ x: offX + (p.lon - minLon) * k * scale, y: offY + (maxLat - p.lat) * scale });
   fn.pxPerKm = scale / 111.32; // 1° de latitude ≈ 111,32 km
   return fn;
 })();
 
-// --- Cercles orange centrés sur Tahiti (Papeete) ---------------------------
-// Tahiti n'est pas affichée : elle sert seulement de centre. Un cercle tous
-// les RING_STEP_KM, jusqu'à englober l'atoll le plus éloigné.
-const TAHITI = { lat: -17.535, lon: -149.569 };
-const RING_STEP_KM = 200;
-(() => {
-  const c = PROJ(TAHITI);
-  const ringsGroup = document.getElementById("rings");
-  const maxPx = Math.max(...TUAMS_CONFIG.atolls.map(a => {
-    const q = PROJ(a); return Math.hypot(q.x - c.x, q.y - c.y);
-  }));
-  const stepPx = RING_STEP_KM * PROJ.pxPerKm;
-  for (let r = stepPx; r < maxPx + stepPx; r += stepPx) {
-    ringsGroup.appendChild(svgEl("circle", { class: "depth-line", cx: c.x, cy: c.y, r }));
-  }
-})();
-
-function createAtollMarker(atoll){
-  const { x, y } = PROJ(atoll);
-  const hasXpubs = !!atoll.xpub;
-  const r = hasXpubs ? 11 : 6;
-  const g = svgEl("g", {
-    class: "atoll" + (hasXpubs ? "" : " atoll--empty"), "data-id": atoll.id, tabindex: "0",
-    role: "button", "aria-label": "Atoll " + atoll.name,
-  });
-  const hit = svgEl("circle", { class: "hit", cx: x, cy: y, r: 14 });
-  const fill = svgEl("circle", { class: "lagoon-fill", cx: x, cy: y, r: Math.max(r - 3, 2) });
-  const ring = svgEl("circle", { class: "ring", cx: x, cy: y, r });
-  const label = svgEl("text", { x, y: y + r + 16, "text-anchor": "middle" });
-  label.textContent = atoll.name;
-
-  g.append(hit, fill, ring, label);
-  g.addEventListener("click", () => selectAtoll(atoll.id));
-  g.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") selectAtoll(atoll.id); });
-  return g;
+function svg(tag, attrs, parent){
+  const el = document.createElementNS("http://www.w3.org/2000/svg", tag);
+  for (const k in attrs) el.setAttribute(k, attrs[k]);
+  if (parent) parent.appendChild(el);
+  return el;
 }
 
-// Atolls sans xpub dessinés d'abord, pour que ceux avec xpub restent au-dessus.
-[...TUAMS_CONFIG.atolls]
-  .sort((a, b) => !!a.xpub - !!b.xpub)
-  .forEach(atoll => atollsGroup.appendChild(createAtollMarker(atoll)));
-
-function selectAtoll(id){
-  const g = document.querySelector(`.atoll[data-id="${id}"]`);
-  const alreadyActive = g.classList.contains("active");
-  document.querySelectorAll(".atoll").forEach(el => el.classList.remove("active"));
-
-  if (alreadyActive) {
-    panel.classList.remove("aside--atoll");
-    panel.innerHTML = DEFAULT_PANEL_HTML;
-    return;
-  }
-  g.classList.add("active");
-  panel.classList.add("aside--atoll");
-  renderPanel(TUAMS_CONFIG.atolls.find(a => a.id === id));
+// Cercles de distance autour de Tahiti, jusqu'à l'atoll le plus éloigné.
+{
+  const c = project(CONFIG.map.center);
+  const maxR = Math.max(...CONFIG.atolls.map(a => { const p = project(a); return Math.hypot(p.x - c.x, p.y - c.y); }));
+  const step = CONFIG.map.ringStepKm * project.pxPerKm;
+  for (let r = step; r < maxR + step; r += step) svg("circle", { class: "ring-km", cx: c.x, cy: c.y, r }, $("rings"));
 }
 
-function renderPanel(atoll){
-  const xpub = atoll.xpub;
-  if (!xpub) {
-    panel.innerHTML = `
-      <div class="panel-header panel-header--first">
-        <h2 class="panel-title">${atoll.name}</h2>
-        <div class="status-note status-soon">Upcoming</div>
-      </div>
-    `;
-    return;
-  }
-  const label = atoll.name;
-  const isAvailable = xpub.status.startsWith("Available");
-  const statusClass = isAvailable ? "status-ok" : "status-down";
-
-  // Le champ tx s'affiche dès qu'il est défini sur le xpub, quel que soit
-  // son statut.
-  const txField = xpub.tx ? `
-      <div class="field-value"><span>${xpub.tx}</span><button data-copy="${xpub.tx}" aria-label="Copy ${label} tx">COPY</button></div>` : "";
-
-  let feeBlock = "", payBlock = "";
-  if (isAvailable) {
-    const totalBtc = satsToBtc(btcToSats(atoll.fee) + refSats(atoll));
-    feeBlock = `
-      <div class="fee-note"><span>Opening = ${totalBtc} BTC</span><span>Travel ≈ 0.1 BTC</span></div>`;
-    payBlock = `
-      <div class="pay-block"><span class="psbt-btn" data-href="bitcoin:${MAIN_BTC_ADDRESS}?amount=${totalBtc}&label=${encodeURIComponent(label)}" role="link" tabindex="0">PAY</span></div>`;
-  }
-
-  panel.innerHTML = `
-      <div class="panel-header panel-header--first">
-        <h2 class="panel-title">${label}</h2>
-        <div class="status-note ${statusClass}">${xpub.status}</div>
-      </div>
-      <div class="field-value"><span>${xpub.value}</span><button data-copy="${xpub.value}" aria-label="Copy ${label} xpub">COPY</button></div>${txField}${feeBlock}${payBlock}
-    `;
-}
-
-// Délégation d'événement unique pour tous les boutons "COPY" (panneau et
-// footer) : pas besoin de rebrancher les écouteurs à chaque rendu du panneau.
-document.addEventListener("click", e => {
-  const btn = e.target.closest("[data-copy]");
-  if (!btn) return;
-  navigator.clipboard.writeText(btn.dataset.copy).then(() => {
-    const original = btn.textContent;
-    btn.textContent = "✓ OK";
-    setTimeout(() => btn.textContent = original, 1200);
-  });
+// Atolls (les discrets d'abord, pour que les "Available" restent au-dessus).
+[...CONFIG.atolls].sort((a, b) => isAvailable(a) - isAvailable(b)).forEach(atoll => {
+  const { x, y } = project(atoll);
+  const r = isAvailable(atoll) ? 11 : 6;
+  const g = svg("g", { class: "atoll" + (isAvailable(atoll) ? "" : " muted"), tabindex: 0, role: "button", "aria-label": "Atoll " + atoll.name }, $("atolls"));
+  svg("circle", { class: "hit", cx: x, cy: y, r: 14 }, g);
+  svg("circle", { class: "lagoon", cx: x, cy: y, r: Math.max(r - 3, 2) }, g);
+  svg("circle", { class: "ring", cx: x, cy: y, r }, g);
+  svg("text", { x, y: y + r + 16, "text-anchor": "middle" }, g).textContent = atoll.name;
+  atoll.el = g;
+  g.addEventListener("click", () => select(atoll));
+  g.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); select(atoll); } });
 });
-// --- Liens en JavaScript ----------------------------------------------------
-// Tous les liens sont des <span data-href> : pas de vrai <a href>, donc pas de
-// bulle d'adresse du navigateur au survol. Clic → même onglet pour mailto: /
-// bitcoin: / liens internes, nouvel onglet pour les sites externes (et pour
-// tout lien avec Cmd/Ctrl+clic ou clic molette). Entrée/Espace au clavier.
-function openLink(el, newTab){
-  const url = el.dataset.href;
-  const external = /^https?:/i.test(url);
-  if (newTab || external) window.open(url, "_blank", "noopener");
-  else window.location.href = url;
+
+// --- Panneau ----------------------------------------------------------------
+let selected = null;
+function select(atoll){
+  if (selected) selected.el.classList.remove("active");
+  selected = selected === atoll ? null : atoll; // re-clic = désélection
+  panel.classList.toggle("atoll-view", !!selected);
+  if (!selected) { panel.innerHTML = INTRO_HTML; return; }
+  atoll.el.classList.add("active");
+  panel.innerHTML = atollHtml(atoll);
 }
+
+function atollHtml(atoll){
+  const s = statusOf(atoll), x = atoll.xpub;
+  const field = (v, what) => `<div class="field"><span>${v}</span><button data-copy="${v}" aria-label="Copy ${atoll.name} ${what}">COPY</button></div>`;
+  let html = `<div class="panel-head"><h2>${atoll.name}</h2><span class="badge ${s.toLowerCase()}">${s}</span></div>`;
+  if (!x) return html;
+  html += field(x.value, "xpub");
+  if (x.tx) html += field(x.tx, "tx");
+  if (s === "Available") {
+    const btc = openingBtc(atoll);
+    const uri = `bitcoin:${CONFIG.btcAddress}?amount=${btc}&label=${encodeURIComponent(atoll.name)}`;
+    html += `<div class="fees"><span>Opening = ${btc} BTC</span><span>Travel ${CONFIG.travelFee}</span></div>`
+          + `<div class="pay"><span class="btn" data-href="${uri}" role="link" tabindex="0">PAY</span></div>`;
+  }
+  return html;
+}
+
+// --- Liens et boutons COPY (délégation d'événements) -------------------------
+// Les liens fixes pointent vers CONFIG.links (data-link) ; PAY a son URL en
+// data-href. Sites externes et Cmd/Ctrl+clic/clic molette → nouvel onglet.
+function linkUrl(el){ return el.dataset.href || CONFIG.links[el.dataset.link]; }
+function openLink(el, newTab){
+  const url = linkUrl(el);
+  if (newTab || /^https?:/i.test(url)) window.open(url, "_blank", "noopener");
+  else location.href = url;
+}
+document.querySelectorAll("[data-link]").forEach(el => { el.tabIndex = 0; el.setAttribute("role", "link"); });
+
 document.addEventListener("click", e => {
-  const el = e.target.closest("[data-href]");
-  if (!el) return;
-  e.preventDefault();
-  openLink(el, e.metaKey || e.ctrlKey);
+  const copy = e.target.closest("[data-copy]");
+  if (copy) {
+    navigator.clipboard.writeText(copy.dataset.copy).then(() => {
+      copy.textContent = "✓ OK";
+      setTimeout(() => copy.textContent = "COPY", 1200);
+    });
+    return;
+  }
+  const link = e.target.closest("[data-link],[data-href]");
+  if (link) { e.preventDefault(); openLink(link, e.metaKey || e.ctrlKey); }
 });
 document.addEventListener("auxclick", e => {
-  const el = e.target.closest("[data-href]");
-  if (el && e.button === 1) { e.preventDefault(); openLink(el, true); }
+  const link = e.target.closest("[data-link],[data-href]");
+  if (link && e.button === 1) { e.preventDefault(); openLink(link, true); }
 });
 document.addEventListener("keydown", e => {
-  const el = e.target.closest && e.target.closest("[data-href]");
-  if (el && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); openLink(el, e.metaKey || e.ctrlKey); }
+  const link = e.target.closest?.("[data-link],[data-href]");
+  if (link && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); openLink(link, e.metaKey || e.ctrlKey); }
 });
 </script>
 </body>
