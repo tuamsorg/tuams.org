@@ -180,7 +180,7 @@ aside.atoll-view>:last-child{margin-bottom:0}
    et "Assigned" sont discrets (nom visible au survol).
    ========================================================================== */
 const CONFIG = {
-  version: "2.22.105",                                    // footer — à monter à chaque modification
+  version: "2.22.111",                                    // footer — à monter à chaque modification
   btcAddress: "bc1qp6ejw8ptj9l9pkscmlf8fhhkrrjeawgpyjvtq8", // reçoit tous les paiements
   travelFee: "≈ 0.04 BTC",                                 // texte affiché à côté du montant d'ouverture
 
@@ -194,38 +194,39 @@ const CONFIG = {
   },
 
   map: {
-    center: { lat: -17.535, lon: -149.569 }, // Tahiti (Papeete) : centre des cercles, où s'affiche le logo
-    ringStepKm: 200,                         // un cercle orange tous les N km
-    logo: { src: "logo.svg", size: 70 },     // logo au centre (fichier à côté d'index.html) ; size = diamètre du cercle
+    center: { lat: -17.535, lon: -149.570 }, // Tahiti (Papeete) : centre des cercles, où s'affiche le logo
+    ringStepKm: 400,                         // un cercle orange tous les N km
+    extraRings: 1,                           // nombre de cercles en plus au-delà de l'atoll le plus éloigné
+    logo: { src: "logo.svg", size: 90 },     // logo au centre (fichier à côté d'index.html) ; size = diamètre du cercle
   },
 
-  // 21 atolls des Tuamotu desservis par Air Tahiti.
+  // 21 atolls des Tuamotu desservis par Air Tahiti. Coordonnées : Wikipédia (vérifiées 10/2026).
   // fee: "404" = frais pas encore fixés (à remplacer avant de passer un atoll en "Available").
   atolls: [
-    { name: "Mataiva",    lat: -14.88, lon: -148.67, fee: "404",   postal: 98777 },
-    { name: "Tikehau",    lat: -15.00, lon: -148.17, fee: "404",   postal: 98778 },
-    { name: "Rangiroa",   lat: -15.12, lon: -147.65, fee: "404",   postal: 98775 }, // Avatoru (Tiputa = 98776)
-    { name: "Arutua",     lat: -15.25, lon: -146.75, fee: "404",   postal: 98761 },
-    { name: "Apataki",    lat: -15.45, lon: -146.38, fee: "404",   postal: 98762 },
-    { name: "Ahe",        lat: -14.50, lon: -146.33, fee: "404",   postal: 98770 },
-    { name: "Takaroa",    lat: -14.45, lon: -144.98, fee: "404",   postal: 98781 },
-    { name: "Fakarava",   lat: -16.30, lon: -145.62, fee: "404",   postal: 98763 },
-    { name: "Faaite",     lat: -16.75, lon: -145.25, fee: "404",   postal: 98786 },
-    { name: "Anaa",       lat: -17.40, lon: -145.50, fee: "404",   postal: 98760 },
-    { name: "Makemo",     lat: -16.60, lon: -143.80, fee: "404",   postal: 98769 },
-    { name: "Takume",     lat: -15.80, lon: -142.20, fee: "404",   postal: 98790 }, // à vérifier
-    { name: "Hikueru",    lat: -17.58, lon: -142.63, fee: "404",   postal: 98768 },
-    { name: "Napuka",     lat: -14.17, lon: -141.25, fee: "404",   postal: 98772,
+    { name: "Mataiva",    lat: -14.883, lon: -148.717, fee: "404",   postal: 98777 },
+    { name: "Tikehau",    lat: -15.070, lon: -148.130, fee: "404",   postal: 98778 },
+    { name: "Rangiroa",   lat: -15.125, lon: -147.645, fee: "404",   postal: 98775 }, // Avatoru (Tiputa = 98776)
+    { name: "Arutua",     lat: -15.245, lon: -146.612, fee: "404",   postal: 98761 },
+    { name: "Apataki",    lat: -15.449, lon: -146.329, fee: "404",   postal: 98762 },
+    { name: "Ahe",        lat: -14.483, lon: -146.317, fee: "404",   postal: 98770 },
+    { name: "Takaroa",    lat: -14.450, lon: -144.983, fee: "404",   postal: 98781 },
+    { name: "Fakarava",   lat: -16.300, lon: -145.633, fee: "404",   postal: 98763 },
+    { name: "Faaite",     lat: -16.717, lon: -145.317, fee: "404",   postal: 98786 },
+    { name: "Anaa",       lat: -17.342, lon: -145.509, fee: "404",   postal: 98760 },
+    { name: "Makemo",     lat: -16.599, lon: -143.661, fee: "404",   postal: 98769 },
+    { name: "Takume",     lat: -15.800, lon: -142.200, fee: "404",   postal: 98790 }, // à vérifier
+    { name: "Hikueru",    lat: -17.589, lon: -142.617, fee: "404",   postal: 98768 },
+    { name: "Napuka",     lat: -14.170, lon: -141.231, fee: "404",   postal: 98772,
       xpub: { value: "xpub_NAPUKA", status: "Assigned",
               tx: "tx_NAPUKA" } },
-    { name: "Fakahina",   lat: -15.98, lon: -140.15, fee: "404",   postal: 98766 },
-    { name: "Puka Puka",  lat: -14.83, lon: -138.83, fee: "404",   postal: 98774 },
-    { name: "Hao",        lat: -18.20, lon: -140.90, fee: "0.04",  postal: 98767,
+    { name: "Fakahina",   lat: -15.983, lon: -140.183, fee: "404",   postal: 98766 },
+    { name: "Puka Puka",  lat: -14.820, lon: -138.820, fee: "404",   postal: 98774 },
+    { name: "Hao",        lat: -18.075, lon: -140.945, fee: "0.04",  postal: 98767,
       xpub: { value: "xpub_HAO", status: "Available" } },
-    { name: "Tatakoto",   lat: -17.33, lon: -138.40, fee: "404",   postal: 98783 },
-    { name: "Nukutavake", lat: -19.28, lon: -138.78, fee: "404",   postal: 98773 },
-    { name: "Reao",       lat: -18.50, lon: -136.40, fee: "404",   postal: 98779 },
-    { name: "Tureia",     lat: -20.80, lon: -138.55, fee: "404",   postal: 98784 },
+    { name: "Tatakoto",   lat: -17.352, lon: -138.401, fee: "404",   postal: 98783 },
+    { name: "Nukutavake", lat: -19.267, lon: -138.767, fee: "404",   postal: 98773 },
+    { name: "Reao",       lat: -18.470, lon: -136.443, fee: "404",   postal: 98779 },
+    { name: "Tureia",     lat: -20.771, lon: -138.565, fee: "404",   postal: 98784 },
   ],
 };
 /* ======================== FIN DE LA CONFIG ================================ */
@@ -252,16 +253,28 @@ function openingBtc(atoll){
 // --- Carte ------------------------------------------------------------------
 // Projection équirectangulaire (corrigée par cos de la latitude moyenne),
 // recadrée automatiquement sur les atolls + Tahiti (pour que le logo soit
-// entièrement visible) dans le viewBox 900×600.
+// entièrement visible) + le bord droit du dernier cercle, dans le viewBox 900×600.
+const RINGS_KM = (() => { // rayons des cercles de distance, en km
+  const c = CONFIG.map.center, step = CONFIG.map.ringStepKm;
+  const kc = Math.cos(c.lat * Math.PI / 180);
+  const maxKm = Math.max(...CONFIG.atolls.map(a => Math.hypot((a.lon - c.lon) * kc, a.lat - c.lat) * 111.32));
+  const out = [];
+  for (let r = step; r < maxKm + CONFIG.map.extraRings * step; r += step) out.push(r);
+  return out;
+})();
 const project = (() => {
-  const W = 900, H = 600, MX = 80, MY = 55;
-  const pts = [...CONFIG.atolls, CONFIG.map.center];
+  const W = 900, H = 600, MY = 55;
+  const ML = CONFIG.map.logo.size / 2 + 5, MR = 5; // marges gauche (logo) et droite (dernier cercle)
+  const c = CONFIG.map.center;
+  const lats0 = [...CONFIG.atolls, c].map(a => a.lat);
+  const k = Math.cos((Math.min(...lats0) + Math.max(...lats0)) / 2 * Math.PI / 180);
+  const edge = { lat: c.lat, lon: c.lon + RINGS_KM[RINGS_KM.length - 1] / 111.32 / k }; // bord droit du dernier cercle
+  const pts = [...CONFIG.atolls, c, edge];
   const lats = pts.map(a => a.lat), lons = pts.map(a => a.lon);
   const minLat = Math.min(...lats), maxLat = Math.max(...lats);
   const minLon = Math.min(...lons), maxLon = Math.max(...lons);
-  const k = Math.cos((minLat + maxLat) / 2 * Math.PI / 180);
-  const scale = Math.min((W - 2 * MX) / ((maxLon - minLon) * k), (H - 2 * MY) / (maxLat - minLat));
-  const offX = (W - (maxLon - minLon) * k * scale) / 2, offY = (H - (maxLat - minLat) * scale) / 2;
+  const scale = Math.min((W - ML - MR) / ((maxLon - minLon) * k), (H - 2 * MY) / (maxLat - minLat));
+  const offX = ML + (W - ML - MR - (maxLon - minLon) * k * scale) / 2, offY = (H - (maxLat - minLat) * scale) / 2;
   const fn = p => ({ x: offX + (p.lon - minLon) * k * scale, y: offY + (maxLat - p.lat) * scale });
   fn.pxPerKm = scale / 111.32; // 1° de latitude ≈ 111,32 km
   return fn;
@@ -274,12 +287,10 @@ function svg(tag, attrs, parent){
   return el;
 }
 
-// Cercles de distance autour de Tahiti, jusqu'à l'atoll le plus éloigné.
+// Cercles de distance autour de Tahiti, plus extraRings au-delà de l'atoll le plus éloigné (Reao).
 {
   const c = project(CONFIG.map.center);
-  const maxR = Math.max(...CONFIG.atolls.map(a => { const p = project(a); return Math.hypot(p.x - c.x, p.y - c.y); }));
-  const step = CONFIG.map.ringStepKm * project.pxPerKm;
-  for (let r = step; r < maxR; r += step) svg("circle", { class: "ring-km", cx: c.x, cy: c.y, r }, $("rings"));
+  RINGS_KM.forEach(km => svg("circle", { class: "ring-km", cx: c.x, cy: c.y, r: km * project.pxPerKm }, $("rings")));
 
   // Logo au centre (à la place de Tahiti) : disque noir + image.
   const { src, size } = CONFIG.map.logo, img = size;        // logo.svg a sa propre marge
