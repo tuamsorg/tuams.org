@@ -9,10 +9,13 @@
 *{box-sizing:border-box}
 html,body{margin:0;padding:0;background:#000;color:#fff;font-family:monospace;height:100%}
 html{width:100vw;overflow-x:hidden}
-a{color:#fff}
 
-.glow-link{color:#fff;text-decoration:none;text-shadow:0 0 0 rgba(255,255,255,0);transition:text-shadow .18s ease}
+.glow-link{color:#fff;text-decoration:none;text-shadow:none}
 .glow-link:hover{text-shadow:0 0 10px rgba(255,255,255,.8)}
+/* Liens en JavaScript (pas de <a href>) : le navigateur n'affiche plus
+   la bulle d'adresse en bas de fenêtre au survol. Voir openLink() en bas. */
+[data-href]{cursor:pointer;color:#fff;text-decoration:none}
+[data-href]:focus:not(:focus-visible){outline:none}
 
 header{padding:1.8rem clamp(1.2rem,5vw,4rem);border-bottom:1px solid #fff;display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap}
 header h1{font-size:clamp(1.6rem,3vw,2.3rem);margin:0;display:flex;align-items:center;gap:.6rem;flex-wrap:wrap}
@@ -32,7 +35,7 @@ main{display:grid;grid-template-columns:minmax(0,2.2fr) minmax(300px,380px);min-
   /* align-content:start évite que la grille étire les 2 lignes (carte +
      panneau) quand le contenu est plus court que min-height, ce qui
      décalerait le titre du panneau vers le bas selon l'atoll affiché. */
-  main{grid-template-columns:1fr;align-content:start}
+  main{grid-template-columns:1fr;grid-template-rows:auto 1fr;align-content:start}
   .chart-wrap{border-right:none;border-bottom:1px solid #fff}
 }
 
@@ -56,10 +59,16 @@ svg.chart{width:100%;height:auto;display:block;aspect-ratio:900/600}
 @media (max-width:880px){ .atoll text{font-size:26px;stroke-width:6px} }
 
 aside{padding:clamp(1.2rem,3vw,2rem);min-height:260px}
+/* Panneau d'un atoll sélectionné : contenu centré verticalement, pour un
+   espace identique entre la barre du haut et le titre, et entre le bas du
+   contenu (PAY) et la barre du bas. Sur mobile, la ligne 1fr de la grille
+   donne au panneau toute la hauteur restante jusqu'au footer. */
+aside.aside--atoll{display:flex;flex-direction:column;justify-content:center}
+aside.aside--atoll > *{flex:none}
+.panel-header .panel-title{margin:0}
 
 .panel-header{display:flex;justify-content:space-between;align-items:center;gap:.75rem;margin-bottom:1.5rem;padding-top:1.5rem}
-/* Le premier bloc affiché (posé en JS, indépendant du numéro fixe de
-   l'xpub) n'a pas de padding-top, quel que soit le nombre de blocs. */
+/* Le bloc d'en-tête du panneau atoll n'a pas de padding-top. */
 .panel-header.panel-header--first{padding-top:0}
 
 .field-value{
@@ -84,7 +93,7 @@ aside{padding:clamp(1.2rem,3vw,2rem);min-height:260px}
 .status-note.status-down{background:rgba(231,76,60,.15);color:#E74C3C;border:1px solid #E74C3C}
 .status-note.status-soon{background:rgba(247,147,26,.15);color:#F7931A;border:1px solid #F7931A}
 
-.pay-block{text-align:center;margin-top:2.2rem}
+.pay-block{display:flex;justify-content:center;margin-top:2.2rem}
 
 footer{
   padding:1.5rem clamp(1.2rem,5vw,4rem) calc(1.5rem + env(safe-area-inset-bottom,0px));
@@ -133,10 +142,10 @@ footer{
 <body>
 
 <header>
-  <h1><a class="glow-link" href="/">tuams.org</a></h1>
+  <h1><span class="glow-link" data-href="/" role="link" tabindex="0">tuams.org</span></h1>
   <span class="header-actions">
-    <a class="glow-link subscribe-outline" href="https://x.com/tuamsorg" aria-label="Subscribe to notifications on X, @tuamsorg">Subscribe to X.com notifications: @tuamsorg</a>
-    <a class="psbt-btn" href="mailto:PSBT@tuams.org">PSBT</a>
+    <span class="glow-link subscribe-outline" data-href="https://x.com/tuamsorg" aria-label="Subscribe to notifications on X, @tuamsorg" role="link" tabindex="0">Subscribe to X.com notifications: @tuamsorg</span>
+    <span class="psbt-btn" data-href="mailto:PSBT@tuams.org" role="link" tabindex="0">PSBT</span>
   </span>
 </header>
 
@@ -159,7 +168,7 @@ footer{
     <div class="onboarding-group">
       <p class="onboarding-label">Opening</p>
       <ul class="onboarding">
-        <li><span class="step-num">1</span><span>Select an atoll on the map and pick an available xpub.</span></li>
+        <li><span class="step-num">1</span><span>Select an available atoll on the map.</span></li>
         <li><span class="step-num">2</span><span>Pay the opening fees with a Bitcoin address that you own.</span></li>
         <li><span class="step-num step-num--icon">⚷︎</span><span>Now your sending address becomes your PROOF address.</span></li>
       </ul>
@@ -173,7 +182,7 @@ footer{
     <div class="onboarding-group">
       <p class="onboarding-label">Signing</p>
       <ul class="onboarding">
-        <li><span class="step-num">4</span><span>Send your PSBT → <a class="glow-link" href="mailto:PSBT@tuams.org">PSBT@tuams.org</a> <a class="glow-link" href="pgp.asc">[PGP]</a>.</span></li>
+        <li><span class="step-num">4</span><span>Send your PSBT → <span class="glow-link" data-href="mailto:PSBT@tuams.org" role="link" tabindex="0">PSBT@tuams.org</span> <span class="glow-link" data-href="pgp.asc" role="link" tabindex="0">[PGP]</span>.</span></li>
         <li><span class="step-num">5</span><span>Pay the travel fees with your PROOF Bitcoin address.</span></li>
         <li><span class="step-num step-num--icon">✈︎</span><span>Tuams is leaving Tahiti for the atoll to sign and return your PSBT.</span></li>
         <li><span class="step-num">6</span><span>You can sign and broadcast it.</span></li>
@@ -183,65 +192,55 @@ footer{
 </main>
 
 <footer>
-  © The Tuams Organization — <a class="glow-link" href="https://www.tuams.org/">https://www.tuams.org/</a> — <a class="glow-link" href="https://github.com/tuamsorg/tuams.org">2.22.74</a>
+  © The Tuams Organization — <span class="glow-link" data-href="https://www.tuams.org/" role="link" tabindex="0">https://www.tuams.org/</span> — <span class="glow-link" data-href="https://github.com/tuamsorg/tuams.org" role="link" tabindex="0">2.22.79</span>
 </footer>
 
 <script>
 // ==========================================================================
-// ÉDITION RAPIDE PAR CLÉ — tout se passe ici, dans xpubs: [ ... ] ci-dessous.
-// Chaque clé est un objet avec ces champs :
+// ÉDITION RAPIDE — une seule xpub par atoll, dans le champ xpub: { ... }.
+// Champs de l'xpub :
 //
-//   num:     numéro fixe affiché dans le titre (ex: 1 → "Hao #01"). Ne change
-//            jamais la position d'affichage (les "Available" passent en
-//            premier automatiquement).
 //   value:   le xpub lui-même.
-//   status:  "Available"    → badge vert, montant + bouton PAY affichés.
+//   status:  "Available" → badge vert, montant + bouton PAY affichés.
 //            "Assigned"  → badge rouge, pas de PAY.
 //   tx:      (optionnel) valeur copiable affichée sous le xpub, dès qu'elle
 //            est définie, quel que soit le statut.
 //
 // Exemples :
-//   { num: 1, value: "xpub...", status: "Available" }
-//   { num: 2, value: "xpub...", status: "Assigned", tx: "abcd...1234" }
+//   xpub: { value: "xpub...", status: "Available" }
+//   xpub: { value: "xpub...", status: "Assigned", tx: "abcd...1234" }
+// Atoll sans xpub : omettre le champ xpub (affiché "Upcoming").
 // ==========================================================================
 const TUAMS_CONFIG = {
   // Les 21 atolls des Tuamotu dotés d'un aérodrome civil desservis par Air Tahiti.
   // lat/lon : centre approximatif de l'atoll, en degrés décimaux (sud et
   // ouest négatifs). La carte se recadre automatiquement sur ces positions.
-  // Un atoll sans xpub (xpubs: []) apparaît en discret ; pour y ouvrir une
-  // clé "Available", renseigner aussi fee et postal (utilisé par refSats).
+  // Un atoll sans xpub apparaît en discret ; pour y ouvrir une clé
+  // "Available", renseigner aussi fee et postal (utilisé par refSats).
   atolls: [
-    { id: "mataiva", name: "Mataiva", lat: -14.88, lon: -148.67, fee: "0.018", postal: 98777,
-      xpubs: [] },
-    { id: "tikehau", name: "Tikehau", lat: -15.00, lon: -148.17, xpubs: [] },
-    { id: "rangiroa", name: "Rangiroa", lat: -15.12, lon: -147.65, xpubs: [] },
-    { id: "arutua", name: "Arutua", lat: -15.25, lon: -146.75, xpubs: [] },
-    { id: "apataki", name: "Apataki", lat: -15.45, lon: -146.38, xpubs: [] },
-    { id: "ahe", name: "Ahe", lat: -14.50, lon: -146.33, xpubs: [] },
-    { id: "takaroa", name: "Takaroa", lat: -14.45, lon: -144.98, xpubs: [] },
-    { id: "fakarava", name: "Fakarava", lat: -16.30, lon: -145.62, xpubs: [] },
-    { id: "faaite", name: "Faaite", lat: -16.75, lon: -145.25, xpubs: [] },
-    { id: "anaa", name: "Anaa", lat: -17.40, lon: -145.50, fee: "0.016", postal: 98760,
-      xpubs: [] },
-    { id: "makemo", name: "Makemo", lat: -16.60, lon: -143.80, fee: "0.017", postal: 98769,
-      xpubs: [] },
-    { id: "takume", name: "Takume", lat: -15.80, lon: -142.20, xpubs: [] },
-    { id: "hikueru", name: "Hikueru", lat: -17.58, lon: -142.63, xpubs: [] },
+    { id: "mataiva", name: "Mataiva", lat: -14.88, lon: -148.67, fee: "0.018", postal: 98777 },
+    { id: "tikehau", name: "Tikehau", lat: -15.00, lon: -148.17 },
+    { id: "rangiroa", name: "Rangiroa", lat: -15.12, lon: -147.65 },
+    { id: "arutua", name: "Arutua", lat: -15.25, lon: -146.75 },
+    { id: "apataki", name: "Apataki", lat: -15.45, lon: -146.38 },
+    { id: "ahe", name: "Ahe", lat: -14.50, lon: -146.33 },
+    { id: "takaroa", name: "Takaroa", lat: -14.45, lon: -144.98 },
+    { id: "fakarava", name: "Fakarava", lat: -16.30, lon: -145.62 },
+    { id: "faaite", name: "Faaite", lat: -16.75, lon: -145.25 },
+    { id: "anaa", name: "Anaa", lat: -17.40, lon: -145.50, fee: "0.016", postal: 98760 },
+    { id: "makemo", name: "Makemo", lat: -16.60, lon: -143.80, fee: "0.017", postal: 98769 },
+    { id: "takume", name: "Takume", lat: -15.80, lon: -142.20 },
+    { id: "hikueru", name: "Hikueru", lat: -17.58, lon: -142.63 },
     { id: "napuka", name: "Napuka", lat: -14.17, lon: -141.25, fee: "0.015", postal: 98772,
-      xpubs: [
-        { num: 1, value: "xpub6C_DSF879SD87FS_NAPUKA", status: "Assigned", tx: "f4184fc596403b9d638783cf57adfe4c75c605f6356fbc91338530e9831e9e16" },
-        { num: 2, value: "xpub6C_DSF879SD87FS_NAPUKA_2", status: "Assigned", tx: "2f4184fc596403b9d638783cf57adfe4c75c605f6356fbc91338530e9831e9e16" },
-        { num: 3, value: "xpub6C_DSF879SD87FS_NAPUKA_3", status: "Assigned", tx: "3f4184fc596403b9d638783cf57adfe4c75c605f6356fbc91338530e9831e9e16" },
-        { num: 4, value: "xpub6C_DSF879SD87FS_NAPUKA_4", status: "Available" },
-      ] },
-    { id: "fakahina", name: "Fakahina", lat: -15.98, lon: -140.15, xpubs: [] },
-    { id: "puka-puka", name: "Puka Puka", lat: -14.83, lon: -138.83, xpubs: [] },
+      xpub: { value: "xpub6C_DSF879SD87FS_NAPUKA", status: "Assigned", tx: "f4184fc596403b9d638783cf57adfe4c75c605f6356fbc91338530e9831e9e16" } },
+    { id: "fakahina", name: "Fakahina", lat: -15.98, lon: -140.15 },
+    { id: "puka-puka", name: "Puka Puka", lat: -14.83, lon: -138.83 },
     { id: "hao", name: "Hao", lat: -18.20, lon: -140.90, fee: "0.014", postal: 98767,
-      xpubs: [] },
-    { id: "tatakoto", name: "Tatakoto", lat: -17.33, lon: -138.40, xpubs: [] },
-    { id: "nukutavake", name: "Nukutavake", lat: -19.28, lon: -138.78, xpubs: [] },
-    { id: "reao", name: "Reao", lat: -18.50, lon: -136.40, xpubs: [] },
-    { id: "tureia", name: "Tureia", lat: -20.80, lon: -138.55, xpubs: [] },
+      xpub: { value: "test", status: "Available" } },
+    { id: "tatakoto", name: "Tatakoto", lat: -17.33, lon: -138.40 },
+    { id: "nukutavake", name: "Nukutavake", lat: -19.28, lon: -138.78 },
+    { id: "reao", name: "Reao", lat: -18.50, lon: -136.40 },
+    { id: "tureia", name: "Tureia", lat: -20.80, lon: -138.55 },
   ],
 };
 
@@ -257,8 +256,8 @@ const DEFAULT_PANEL_HTML = panel.innerHTML;
 // Le site étant statique (pas de backend), une seule adresse BTC reçoit
 // tous les paiements : on ne peut donc pas relier un paiement à un client
 // via l'adresse elle-même. On ajoute au montant de base un supplément fixe
-// en sats = (2 derniers chiffres du code postal de l'atoll) + (numéro de
-// la clé, 2 chiffres). Ex: Hao (98767 → "67") + clé #02 → 6702 sats.
+// en sats = 2 derniers chiffres du code postal de l'atoll (une seule xpub
+// par atoll). Ex: Hao (98767) → 67 sats.
 // Déterministe : calculable à l'avance pour chaque xpub, sans dépendre
 // d'une communication du client. Reste une empreinte pratique, pas une
 // preuve cryptographique (la formule est visible dans ce code source) :
@@ -268,10 +267,8 @@ const DEFAULT_PANEL_HTML = panel.innerHTML;
 // remboursés (traitement manuel, hors site, basé sur l'horodatage on-chain).
 function btcToSats(btc){ return Math.round(parseFloat(btc) * 1e8); }
 function satsToBtc(sats){ return (sats / 1e8).toFixed(8); }
-function refSats(atoll, xpub){
-  const postalSuffix = String(atoll.postal % 100).padStart(2, "0");
-  const keyNum = String(xpub.num).padStart(2, "0");
-  return parseInt(postalSuffix + keyNum, 10);
+function refSats(atoll){
+  return atoll.postal % 100;
 }
 
 function svgEl(tag, attrs){
@@ -316,7 +313,7 @@ const RING_STEP_KM = 200;
 
 function createAtollMarker(atoll){
   const { x, y } = PROJ(atoll);
-  const hasXpubs = atoll.xpubs.length > 0;
+  const hasXpubs = !!atoll.xpub;
   const r = hasXpubs ? 11 : 6;
   const g = svgEl("g", {
     class: "atoll" + (hasXpubs ? "" : " atoll--empty"), "data-id": atoll.id, tabindex: "0",
@@ -334,9 +331,9 @@ function createAtollMarker(atoll){
   return g;
 }
 
-// Atolls sans xpub dessinés d'abord, pour que ceux avec xpubs restent au-dessus.
+// Atolls sans xpub dessinés d'abord, pour que ceux avec xpub restent au-dessus.
 [...TUAMS_CONFIG.atolls]
-  .sort((a, b) => (a.xpubs.length > 0) - (b.xpubs.length > 0))
+  .sort((a, b) => !!a.xpub - !!b.xpub)
   .forEach(atoll => atollsGroup.appendChild(createAtollMarker(atoll)));
 
 function selectAtoll(id){
@@ -345,45 +342,18 @@ function selectAtoll(id){
   document.querySelectorAll(".atoll").forEach(el => el.classList.remove("active"));
 
   if (alreadyActive) {
+    panel.classList.remove("aside--atoll");
     panel.innerHTML = DEFAULT_PANEL_HTML;
     return;
   }
   g.classList.add("active");
+  panel.classList.add("aside--atoll");
   renderPanel(TUAMS_CONFIG.atolls.find(a => a.id === id));
 }
 
-function renderSlot(atoll, xpub, displayIndex){
-  const label = `${atoll.name} #${String(xpub.num).padStart(2, "0")}`;
-  const isAvailable = xpub.status.startsWith("Available");
-  const statusClass = isAvailable ? "status-ok" : "status-down";
-  const headerClass = "panel-header" + (displayIndex === 0 ? " panel-header--first" : "");
-
-  // Le champ tx s'affiche dès qu'il est défini sur le xpub, quel que soit
-  // son statut.
-  const txField = xpub.tx ? `
-      <div class="field-value"><span>${xpub.tx}</span><button data-copy="${xpub.tx}" aria-label="Copy ${label} tx">COPY</button></div>` : "";
-
-  let feeBlock = "", payBlock = "";
-  if (isAvailable) {
-    const noiseSats = refSats(atoll, xpub);
-    const totalBtc = satsToBtc(btcToSats(atoll.fee) + noiseSats);
-    feeBlock = `
-      <div class="fee-note"><span>Opening = ${totalBtc} BTC</span><span>Travel ≈ 0.1 BTC</span></div>`;
-    payBlock = `
-      <div class="pay-block"><a class="psbt-btn" href="bitcoin:${MAIN_BTC_ADDRESS}?amount=${totalBtc}&label=${encodeURIComponent(label)}">PAY</a></div>`;
-  }
-
-  return `
-      <div class="${headerClass}">
-        <h2 class="panel-title">${label}</h2>
-        <div class="status-note ${statusClass}">${xpub.status}</div>
-      </div>
-      <div class="field-value"><span>${xpub.value}</span><button data-copy="${xpub.value}" aria-label="Copy ${label} xpub">COPY</button></div>${txField}${feeBlock}${payBlock}
-    `;
-}
-
 function renderPanel(atoll){
-  if (atoll.xpubs.length === 0) {
+  const xpub = atoll.xpub;
+  if (!xpub) {
     panel.innerHTML = `
       <div class="panel-header panel-header--first">
         <h2 class="panel-title">${atoll.name}</h2>
@@ -392,12 +362,31 @@ function renderPanel(atoll){
     `;
     return;
   }
-  // Les xpubs "Available" s'affichent en premier ; chacun garde son numéro
-  // fixe (xpub.num) dans le titre, indépendant de sa position ici.
-  const sorted = [...atoll.xpubs].sort((a, b) =>
-    (a.status.startsWith("Available") ? 0 : 1) - (b.status.startsWith("Available") ? 0 : 1)
-  );
-  panel.innerHTML = sorted.map((xpub, i) => renderSlot(atoll, xpub, i)).join("");
+  const label = atoll.name;
+  const isAvailable = xpub.status.startsWith("Available");
+  const statusClass = isAvailable ? "status-ok" : "status-down";
+
+  // Le champ tx s'affiche dès qu'il est défini sur le xpub, quel que soit
+  // son statut.
+  const txField = xpub.tx ? `
+      <div class="field-value"><span>${xpub.tx}</span><button data-copy="${xpub.tx}" aria-label="Copy ${label} tx">COPY</button></div>` : "";
+
+  let feeBlock = "", payBlock = "";
+  if (isAvailable) {
+    const totalBtc = satsToBtc(btcToSats(atoll.fee) + refSats(atoll));
+    feeBlock = `
+      <div class="fee-note"><span>Opening = ${totalBtc} BTC</span><span>Travel ≈ 0.1 BTC</span></div>`;
+    payBlock = `
+      <div class="pay-block"><span class="psbt-btn" data-href="bitcoin:${MAIN_BTC_ADDRESS}?amount=${totalBtc}&label=${encodeURIComponent(label)}" role="link" tabindex="0">PAY</span></div>`;
+  }
+
+  panel.innerHTML = `
+      <div class="panel-header panel-header--first">
+        <h2 class="panel-title">${label}</h2>
+        <div class="status-note ${statusClass}">${xpub.status}</div>
+      </div>
+      <div class="field-value"><span>${xpub.value}</span><button data-copy="${xpub.value}" aria-label="Copy ${label} xpub">COPY</button></div>${txField}${feeBlock}${payBlock}
+    `;
 }
 
 // Délégation d'événement unique pour tous les boutons "COPY" (panneau et
@@ -410,6 +399,31 @@ document.addEventListener("click", e => {
     btn.textContent = "✓ OK";
     setTimeout(() => btn.textContent = original, 1200);
   });
+});
+// --- Liens en JavaScript ----------------------------------------------------
+// Tous les liens sont des <span data-href> : pas de vrai <a href>, donc pas de
+// bulle d'adresse du navigateur au survol. Clic → même onglet pour mailto: /
+// bitcoin: / liens internes, nouvel onglet pour les sites externes (et pour
+// tout lien avec Cmd/Ctrl+clic ou clic molette). Entrée/Espace au clavier.
+function openLink(el, newTab){
+  const url = el.dataset.href;
+  const external = /^https?:/i.test(url);
+  if (newTab || external) window.open(url, "_blank", "noopener");
+  else window.location.href = url;
+}
+document.addEventListener("click", e => {
+  const el = e.target.closest("[data-href]");
+  if (!el) return;
+  e.preventDefault();
+  openLink(el, e.metaKey || e.ctrlKey);
+});
+document.addEventListener("auxclick", e => {
+  const el = e.target.closest("[data-href]");
+  if (el && e.button === 1) { e.preventDefault(); openLink(el, true); }
+});
+document.addEventListener("keydown", e => {
+  const el = e.target.closest && e.target.closest("[data-href]");
+  if (el && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); openLink(el, e.metaKey || e.ctrlKey); }
 });
 </script>
 </body>
