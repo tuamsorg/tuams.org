@@ -177,9 +177,9 @@ aside.atoll-view>:last-child{margin-bottom:0}
    et "Assigned" sont discrets (nom visible au survol).
    ========================================================================== */
 const CONFIG = {
-  version: "2.22.84",                                     // footer — à monter à chaque modification
+  version: "2.22.85",                                     // footer — à monter à chaque modification
   btcAddress: "bc1qp6ejw8ptj9l9pkscmlf8fhhkrrjeawgpyjvtq8", // reçoit tous les paiements
-  travelFee: "≈ 0.1 BTC",                                 // texte affiché à côté du montant d'ouverture
+  travelFee: "≈ 0.04 BTC",                                 // texte affiché à côté du montant d'ouverture
 
   links: {
     home: "/",
@@ -198,7 +198,7 @@ const CONFIG = {
   // 21 atolls des Tuamotu desservis par Air Tahiti.
   // fee: "404" = frais pas encore fixés (à remplacer avant de passer un atoll en "Available").
   atolls: [
-    { name: "Mataiva",    lat: -14.88, lon: -148.67, fee: "0.018", postal: 98777 },
+    { name: "Mataiva",    lat: -14.88, lon: -148.67, fee: "404",   postal: 98777 },
     { name: "Tikehau",    lat: -15.00, lon: -148.17, fee: "404",   postal: 98778 },
     { name: "Rangiroa",   lat: -15.12, lon: -147.65, fee: "404",   postal: 98775 }, // Avatoru (Tiputa = 98776)
     { name: "Arutua",     lat: -15.25, lon: -146.75, fee: "404",   postal: 98761 },
@@ -207,17 +207,17 @@ const CONFIG = {
     { name: "Takaroa",    lat: -14.45, lon: -144.98, fee: "404",   postal: 98781 },
     { name: "Fakarava",   lat: -16.30, lon: -145.62, fee: "404",   postal: 98763 },
     { name: "Faaite",     lat: -16.75, lon: -145.25, fee: "404",   postal: 98786 },
-    { name: "Anaa",       lat: -17.40, lon: -145.50, fee: "0.016", postal: 98760 },
-    { name: "Makemo",     lat: -16.60, lon: -143.80, fee: "0.017", postal: 98769 },
+    { name: "Anaa",       lat: -17.40, lon: -145.50, fee: "404",   postal: 98760 },
+    { name: "Makemo",     lat: -16.60, lon: -143.80, fee: "404",   postal: 98769 },
     { name: "Takume",     lat: -15.80, lon: -142.20, fee: "404",   postal: 98790 }, // à vérifier
     { name: "Hikueru",    lat: -17.58, lon: -142.63, fee: "404",   postal: 98768 },
-    { name: "Napuka",     lat: -14.17, lon: -141.25, fee: "0.015", postal: 98772,
-      xpub: { value: "xpub6C_DSF879SD87FS_NAPUKA", status: "Assigned",
-              tx: "f4184fc596403b9d638783cf57adfe4c75c605f6356fbc91338530e9831e9e16" } },
+    { name: "Napuka",     lat: -14.17, lon: -141.25, fee: "404",   postal: 98772,
+      xpub: { value: "xpub_NAPUKA", status: "Assigned",
+              tx: "tx_NAPUKA" } },
     { name: "Fakahina",   lat: -15.98, lon: -140.15, fee: "404",   postal: 98766 },
     { name: "Puka Puka",  lat: -14.83, lon: -138.83, fee: "404",   postal: 98774 },
-    { name: "Hao",        lat: -18.20, lon: -140.90, fee: "0.014", postal: 98767,
-      xpub: { value: "test", status: "Available" } },
+    { name: "Hao",        lat: -18.20, lon: -140.90, fee: "0.04",  postal: 98767,
+      xpub: { value: "xpub_HAO", status: "Available" } },
     { name: "Tatakoto",   lat: -17.33, lon: -138.40, fee: "404",   postal: 98783 },
     { name: "Nukutavake", lat: -19.28, lon: -138.78, fee: "404",   postal: 98773 },
     { name: "Reao",       lat: -18.50, lon: -136.40, fee: "404",   postal: 98779 },
