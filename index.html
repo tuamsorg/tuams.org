@@ -13,9 +13,17 @@
   --orange:#F7931A; --green:#2ECC71; --red:#E74C3C; --teal:63,216,196;
   --pad-x:clamp(1.2rem,5vw,4rem); --pad-panel:clamp(1.2rem,3vw,2rem);
   --pad-y:1.5rem; /* espace vertical identique de part et d'autre de la barre du footer */
+  /* Échelle typographique : 3 tailles de texte + 2 titres. Tout le texte de la page en dépend. */
+  --fs-sm:.8rem;   /* petit : badge, COPY, bouton X, numéros d'étapes */
+  --fs:.9rem;      /* normal : texte, frais, footer, champs, boutons, noms d'atolls sur la carte */
+  --fs-lg:1rem;    /* intertitres (GENERATION…) et icônes d'étapes */
+  --fs-h2:1.35rem; /* Why? / nom de l'atoll */
+  --fs-h1:clamp(1.5rem,2.6vw,2rem); /* tuams.org */
 }
 *{box-sizing:border-box}
-html,body{margin:0;cursor:default;background:#000;color:#fff;font-family:monospace}
+html,body{margin:0;cursor:default;background:#000;color:#fff;font-family:monospace,monospace} /* « monospace,monospace » : taille de base 16px au lieu de 13px */
+body{font-size:var(--fs)}
+button{font:inherit}
 html{height:100%}
 /* Page en colonne : header, main (prend toute la hauteur libre), footer. */
 body{min-height:100%;display:flex;flex-direction:column}
@@ -26,19 +34,20 @@ html{overflow-x:hidden}
 [data-link]:focus:not(:focus-visible),[data-href]:focus:not(:focus-visible){outline:none}
 .glow:hover{text-shadow:0 0 10px rgba(255,255,255,.8)}
 
-.btn{background:var(--orange);color:#000;border-radius:4px;padding:.55rem 1rem;font-weight:600;
+.btn{background:var(--orange);color:#000;border-radius:4px;padding:.55rem 1rem;font-weight:600;font-size:var(--fs);
   transition:box-shadow .18s,filter .18s}
 .btn:hover{filter:brightness(1.08);box-shadow:0 0 0 4px rgba(247,147,26,.35)}
 
 /* ---- Header / footer ---- */
 header{padding:1.8rem var(--pad-x);border-bottom:1px solid #fff;display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap}
-header h1{font-size:clamp(1.6rem,3vw,2.3rem);margin:0}
+header h1{font-size:var(--fs-h1);margin:0}
+h2{font-size:var(--fs-h2)}
 header h1 .glow{display:inline-flex;align-items:center;gap:.4em}
 .logo{width:1.1em;height:1.1em;display:block;transition:filter .18s}
 header h1 .glow:hover .logo{filter:drop-shadow(0 0 6px rgba(255,255,255,.8))}
 .header-actions{display:flex;align-items:center;gap:1.2rem;flex-wrap:wrap}
-.pill{border:1px solid #fff;border-radius:20px;padding:.45rem .9rem;font-size:.85rem}
-footer{padding:var(--pad-y) var(--pad-x) calc(var(--pad-y) + env(safe-area-inset-bottom,0px));font-size:.95rem;line-height:1.5;
+.pill{border:1px solid #fff;border-radius:20px;padding:.45rem .9rem;font-size:var(--fs-sm)}
+footer{padding:var(--pad-y) var(--pad-x) calc(var(--pad-y) + env(safe-area-inset-bottom,0px));font-size:var(--fs);line-height:1.5;
   background:#000;border-top:1px solid #fff;position:sticky;bottom:0;z-index:2}
 
 /* ---- Layout : carte + panneau ---- */
@@ -70,14 +79,14 @@ aside{padding:var(--pad-y) var(--pad-panel);min-height:260px}
 .atoll .ring{fill:none;stroke:#fff;stroke-width:2.5;transition:stroke .18s}
 .atoll .lagoon{fill:rgba(var(--teal),.06);transition:fill .18s}
 .atoll:hover .lagoon,.atoll:focus-visible .lagoon{fill:rgba(var(--teal),.18)}
-.atoll text{fill:#fff;font-size:15px;pointer-events:none;stroke:#000;stroke-width:4px;paint-order:stroke}
+/* Noms d'atolls : --atoll-fs est calculé en JS pour donner --fs à l'écran, quelle que soit la taille de la carte. */
+.atoll text{fill:#fff;font-size:var(--atoll-fs,15px);pointer-events:none;stroke:#000;stroke-width:calc(var(--atoll-fs,15px) * .27);paint-order:stroke}
 /* Atolls non disponibles (Upcoming / Assigned) : discrets, nom au survol. */
 .atoll.muted .ring{stroke:rgba(255,255,255,.5);stroke-width:1.5}
 .atoll.muted text{opacity:0;transition:opacity .15s}
 .atoll.muted:hover text,.atoll.muted:focus-visible text,.atoll.muted.active text{opacity:1}
 .atoll.active .lagoon{fill:var(--orange)}
 .atoll.active .ring{stroke:var(--orange)}
-@media (max-width:880px){ .atoll text{font-size:26px;stroke-width:6px} }
 
 /* ---- Panneau d'un atoll (centré verticalement) ---- */
 aside.atoll-view{display:flex;flex-direction:column;justify-content:center}
@@ -85,27 +94,27 @@ aside.atoll-view>*{flex:none}
 aside.atoll-view>:last-child{margin-bottom:0}
 .panel-head{display:flex;justify-content:space-between;align-items:center;gap:.75rem;margin-bottom:1.5rem}
 .panel-head h2{margin:0}
-.badge{display:inline-flex;align-items:center;height:1.9rem;line-height:1;padding:0 .6rem;border-radius:20px;font-size:.9rem;font-weight:700;border:1px solid}
+.badge{display:inline-flex;align-items:center;height:1.9rem;line-height:1;padding:0 .6rem;border-radius:20px;font-size:var(--fs-sm);font-weight:700;border:1px solid}
 .badge.available{color:var(--green);background:rgba(46,204,113,.15)}
 .badge.assigned{color:var(--red);background:rgba(231,76,60,.15)}
 .badge.upcoming{color:var(--orange);background:rgba(247,147,26,.15)}
-.field{font-size:1rem;border:1px solid #fff;border-radius:4px;padding:.55rem .65rem;word-break:break-all;
+.field{font-size:var(--fs);border:1px solid #fff;border-radius:4px;padding:.55rem .65rem;word-break:break-all;
   display:flex;justify-content:space-between;align-items:center;gap:.5rem}
 .field+.field{margin-top:.8rem}
-.field button{flex:none;background:none;border:none;color:#fff;font-size:.9rem;padding:.2rem .3rem}
-.fees{font-size:.95rem;margin-top:1rem;display:flex;justify-content:space-between;flex-wrap:wrap;gap:.3rem 1rem}
+.field button{flex:none;background:none;border:none;color:#fff;font-size:var(--fs-sm);padding:.2rem .3rem}
+.fees{font-size:var(--fs);margin-top:1rem;display:flex;justify-content:space-between;flex-wrap:wrap;gap:.3rem 1rem}
 .fees span:last-child{margin-left:auto}
 .pay{display:flex;justify-content:center;margin-top:2.2rem}
 
 /* ---- Panneau par défaut (explications) ---- */
 .intro h2{margin-bottom:1.2rem}
-.intro p{margin:0 0 1rem;font-size:.95rem;line-height:1.6}
-.intro .label{text-transform:uppercase;font-weight:700;font-size:1.05rem;letter-spacing:.05em;margin:1.5rem 0 1.3rem;line-height:normal}
+.intro p{margin:0 0 1rem;font-size:var(--fs);line-height:1.6}
+.intro .label{text-transform:uppercase;font-weight:700;font-size:var(--fs-lg);letter-spacing:.05em;margin:1.5rem 0 1.3rem;line-height:normal}
 .steps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:.9rem}
-.steps li{display:flex;align-items:center;gap:.7rem;font-size:.95rem;line-height:1.5}
+.steps li{display:flex;align-items:center;gap:.7rem;font-size:var(--fs);line-height:1.5}
 .num{flex:none;display:inline-flex;align-items:center;justify-content:center;width:1.6rem;height:1.6rem;
-  border-radius:50%;border:1px solid #fff;font-size:.8rem;font-weight:700;line-height:1}
-.num.icon{border:none;font-size:1.1rem}
+  border-radius:50%;border:1px solid #fff;font-size:var(--fs-sm);font-weight:700;line-height:1}
+.num.icon{border:none;font-size:var(--fs-lg)}
 </style>
 </head>
 <body>
@@ -113,7 +122,7 @@ aside.atoll-view>:last-child{margin-bottom:0}
 <header>
   <h1><span class="glow" data-link="home"><img class="logo" src="logo.svg" alt="" width="180" height="180">tuams.org</span></h1>
   <span class="header-actions">
-    <span class="glow pill" data-link="x">Subscribe to X.com notifications: @tuamsorg</span>
+    <span class="glow pill" data-link="x" aria-label="Subscribe to X.com notifications: @tuamsorg">@tuamsorg</span>
     <span class="btn" data-link="psbt">PSBT</span>
   </span>
 </header>
@@ -152,7 +161,7 @@ aside.atoll-view>:last-child{margin-bottom:0}
 
       <p class="label">Signing</p>
       <ul class="steps">
-        <li><span class="num">4</span><span>Send your <span class="glow" data-link="psbt">PSBT@tuams.org</span> <span class="glow" data-link="pgp">[PGP⇗]</span>.</span></li>
+        <li><span class="num">4</span><span>Send your <span class="glow" data-link="psbt">PSBT@tuams.org</span> <span class="glow" data-link="pgp" data-download="tuams-pgp.asc" aria-label="Download PGP key">[PGP⤓]</span>.</span></li>
         <li><span class="num">5</span><span>Pay the travel fees with your PROOF address.</span></li>
         <li><span class="num icon">✈︎</span><span>Tuams is leaving Tahiti for the atoll to sign and return your PSBT.</span></li>
         <li><span class="num">6</span><span>You can sign and broadcast it.</span></li>
@@ -184,7 +193,7 @@ aside.atoll-view>:last-child{margin-bottom:0}
    et "Assigned" sont discrets (nom visible au survol).
    ========================================================================== */
 const CONFIG = {
-  version: "2.22.112",                                    // footer — à monter à chaque modification
+  version: "2.22.116",                                    // footer — à monter à chaque modification
   btcAddress: "bc1qp6ejw8ptj9l9pkscmlf8fhhkrrjeawgpyjvtq8", // reçoit tous les paiements
   travelFee: "≈ 0.04 BTC",                                 // texte affiché à côté du montant d'ouverture
 
@@ -302,6 +311,18 @@ function svg(tag, attrs, parent){
   svg("image", { href: src, x: c.x - img / 2, y: c.y - img / 2, width: img, height: img, "aria-label": "Tuams logo" }, $("logo"));
 }
 
+// Noms d'atolls : même taille à l'écran (--fs) quelle que soit la taille de la carte.
+{
+  const chart = document.querySelector("svg.chart");
+  const fit = () => {
+    const k = Math.min(chart.clientWidth / 900, chart.clientHeight / 600); // px écran par unité du viewBox
+    const px = parseFloat(getComputedStyle(document.body).fontSize);       // --fs en px
+    if (k > 0) chart.style.setProperty("--atoll-fs", (px / k).toFixed(2) + "px");
+  };
+  new ResizeObserver(fit).observe(chart);
+  fit();
+}
+
 // Atolls (les discrets d'abord, pour que les "Available" restent au-dessus).
 [...CONFIG.atolls].sort((a, b) => isAvailable(a) - isAvailable(b)).forEach(atoll => {
   const { x, y } = project(atoll);
@@ -350,6 +371,12 @@ function atollHtml(atoll){
 function linkUrl(el){ return el.dataset.href || CONFIG.links[el.dataset.link]; }
 function openLink(el, newTab){
   const url = linkUrl(el);
+  if (el.dataset.download) { // téléchargement direct (ex. clé PGP)
+    const a = document.createElement("a");
+    a.href = url; a.download = el.dataset.download;
+    document.body.appendChild(a); a.click(); a.remove();
+    return;
+  }
   if (newTab || /^https?:/i.test(url)) window.open(url, "_blank", "noopener");
   else location.href = url;
 }
