@@ -124,6 +124,8 @@ aside.atoll-view>:last-child{margin-bottom:0}
 .num.icon{border:none;font-size:var(--fs-lg)}
 /* Icône « télécharger » (flèche dans un plateau) */
 [data-download]{white-space:nowrap}
+/* Icônes des étapes (cadenas, avertissement, avion), dessinées au trait */
+.ico{width:1em;height:1em;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .dl{width:1em;height:1em;vertical-align:-.12em;margin-left:.15em;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 </style>
 </head>
@@ -153,27 +155,27 @@ aside.atoll-view>:last-child{margin-bottom:0}
       <p>French Polynesia has one of the largest atoll chains in the world: the Tuamotu — nicknamed Tuams.</p>
 
       <p class="label">Generation</p>
-      <p>A Trezor Safe 5 — Seedless &amp; MicroSD Card Encryption — is deposited on an atoll.</p>
+      <p>A Trezor (&nbsp;Safe 5; Seedless; MicroSD Card Encryption;&nbsp;) is deposited on an atoll.</p>
       <p>The MicroSD Card needed to use it is kept in Tahiti.</p>
 
       <p class="label">Opening</p>
       <ul class="steps">
         <li><span class="num">1</span><span>Select an available atoll on the map.</span></li>
         <li><span class="num">2</span><span>Pay the opening fees with a Bitcoin address that you own.</span></li>
-        <li><span class="num icon">⚷︎</span><span>Now your sending address becomes your PROOF address.</span></li>
+        <li><span class="num icon"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="1.5"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></span><span>Now your sending address becomes your PROOF address.</span></li>
       </ul>
 
       <p class="label">Integration</p>
       <ul class="steps">
         <li><span class="num">3</span><span>Integrate the xpub into the architecture of your choice.</span></li>
-        <li><span class="num icon">⚠︎</span><span>Plan for an independent recovery method.</span></li>
+        <li><span class="num icon"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5L2.5 20h19z"/><path d="M12 10v4.5M12 17.5v.01"/></svg></span><span>Plan for an independent recovery method.</span></li>
       </ul>
 
       <p class="label">Signing</p>
       <ul class="steps">
         <li><span class="num">4</span><span>Send your <span class="glow" data-link="psbt">PSBT@tuams.org</span> <span class="glow" data-link="pgp" data-download="tuams-pgp.asc" aria-label="Download PGP key">[PGP<svg class="dl" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 15v4h14v-4"/></svg>]</span>.</span></li>
         <li><span class="num">5</span><span>Pay the travel fees with your PROOF address.</span></li>
-        <li><span class="num icon">✈︎</span><span>Tuams travels from Tahiti to the atoll to sign and return your PSBT.</span></li>
+        <li><span class="num icon"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M21.5 12c0-.9-.8-1.5-1.8-1.5H14.5L10 3.5H8l2.2 7H5.6L3.8 8H2.3l.9 4-.9 4h1.5l1.8-2.5h4.6L8 20.5h2l4.5-7h5.2c1 0 1.8-.6 1.8-1.5z"/></svg></span><span>Tuams travels from Tahiti to the atoll to sign and return your PSBT.</span></li>
         <li><span class="num">6</span><span>You can sign and broadcast it.</span></li>
       </ul>
     </div>
@@ -204,8 +206,8 @@ aside.atoll-view>:last-child{margin-bottom:0}
    et "Assigned" sont discrets (nom visible au survol).
    ========================================================================== */
 const CONFIG = {
-  version: "2.25",                                    // footer — à monter à chaque modification
-  btcAddress: "bc1TUAMS", // reçoit tous les paiements
+  version: "2.31",                                    // footer — à monter à chaque modification
+  btcAddress: "bc1TUAMS",                                  // reçoit tous les paiements
   travelFee: "≈ 0.04 BTC",                                 // affiché à gauche du footer
 
   links: {
