@@ -17,7 +17,7 @@
   --fs-sm:.8rem;   /* petit : badge, COPY, bouton X, numéros d'étapes */
   --fs:.9rem;      /* normal : texte, frais, footer, champs, boutons, noms d'atolls sur la carte */
   --fs-lg:1rem;    /* intertitres (GENERATION…) et icônes d'étapes */
-  --fs-h2:1.35rem; /* Why? / nom de l'atoll */
+  --fs-h2:1.35rem; /* Tuams? / nom de l'atoll */
   --fs-h1:clamp(1.5rem,2.6vw,2rem); /* tuams.org */
 }
 *{box-sizing:border-box}
@@ -41,6 +41,14 @@ html{overflow-x:hidden}
 /* ---- Header / footer ---- */
 header{padding:1.8rem var(--pad-x);border-bottom:1px solid #fff;display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap}
 header h1{font-size:var(--fs-h1);margin:0}
+/* Footer : frais de voyage à gauche, mentions à droite (empilés sur petit écran). */
+footer{display:flex;justify-content:space-between;align-items:center;gap:.8rem 1.5rem;flex-wrap:wrap}
+.foot-right{margin-left:auto;text-align:right}
+.travel{white-space:nowrap;display:inline-flex;align-items:center;gap:.55em}
+/* Point orange clignotant devant les frais de voyage */
+.dot{flex:none;width:.55em;height:.55em;border-radius:50%;background:var(--orange);animation:blink 1.6s ease-in-out infinite}
+@keyframes blink{50%{opacity:.15}}
+@media (prefers-reduced-motion:reduce){.dot{animation:none}}
 h2{font-size:var(--fs-h2)}
 header h1 .glow{display:inline-flex;align-items:center;gap:.4em}
 .logo{width:1.1em;height:1.1em;display:block;transition:filter .18s}
@@ -140,13 +148,13 @@ aside.atoll-view>:last-child{margin-bottom:0}
 
   <aside id="panel">
     <div class="intro">
-      <h2>Why?</h2>
-      <p>Tuams introduces a new dimension in Bitcoin security: Geography.</p>
-      <p>French Polynesia has one of the largest sets of atolls in the world: the Tuamotu — nicknamed Tuams.</p>
+      <h2>Tuams?</h2>
+      <p>tuams.org introduces a new dimension in Bitcoin security: Geography.</p>
+      <p>French Polynesia has one of the largest atoll chains in the world: the Tuamotu — nicknamed Tuams.</p>
 
       <p class="label">Generation</p>
-      <p>A Trezor Safe 5 (Seedless, MicroSD Card Encryption) is deposited on an atoll.</p>
-      <p>The MicroSD needed to use it is kept in Tahiti.</p>
+      <p>A Trezor Safe 5 — Seedless &amp; MicroSD Card Encryption — is deposited on an atoll.</p>
+      <p>The MicroSD Card needed to use it is kept in Tahiti.</p>
 
       <p class="label">Opening</p>
       <ul class="steps">
@@ -165,7 +173,7 @@ aside.atoll-view>:last-child{margin-bottom:0}
       <ul class="steps">
         <li><span class="num">4</span><span>Send your <span class="glow" data-link="psbt">PSBT@tuams.org</span> <span class="glow" data-link="pgp" data-download="tuams-pgp.asc" aria-label="Download PGP key">[PGP<svg class="dl" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 15v4h14v-4"/></svg>]</span>.</span></li>
         <li><span class="num">5</span><span>Pay the travel fees with your PROOF address.</span></li>
-        <li><span class="num icon">✈︎</span><span>Tuams is leaving Tahiti for the atoll to sign and return your PSBT.</span></li>
+        <li><span class="num icon">✈︎</span><span>Tuams travels from Tahiti to the atoll to sign and return your PSBT.</span></li>
         <li><span class="num">6</span><span>You can sign and broadcast it.</span></li>
       </ul>
     </div>
@@ -173,7 +181,8 @@ aside.atoll-view>:last-child{margin-bottom:0}
 </main>
 
 <footer>
-  © The Tuams Organization — <span class="glow" data-link="site">https://www.tuams.org/</span> — <span class="glow" data-link="repo" id="version"></span> — <span id="travel"></span>
+  <span class="pill travel"><span class="dot" aria-hidden="true"></span><span id="travel"></span></span>
+  <span class="foot-right">© The Tuams Organization — <span class="glow" data-link="legal" data-download="tuams-legal.pdf" aria-label="Download legal notice (PDF)">Legal<svg class="dl" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 15v4h14v-4"/></svg></span> — <span class="glow" data-link="repo" id="version"></span></span>
 </footer>
 
 <script>
@@ -195,16 +204,16 @@ aside.atoll-view>:last-child{margin-bottom:0}
    et "Assigned" sont discrets (nom visible au survol).
    ========================================================================== */
 const CONFIG = {
-  version: "2.22.119",                                    // footer — à monter à chaque modification
+  version: "2.24",                                    // footer — à monter à chaque modification
   btcAddress: "bc1qp6ejw8ptj9l9pkscmlf8fhhkrrjeawgpyjvtq8", // reçoit tous les paiements
-  travelFee: "≈ 0.04 BTC",                                 // affiché en bas de page, après la version
+  travelFee: "≈ 0.04 BTC",                                 // affiché à gauche du footer
 
   links: {
     home: "/",
     x:    "https://x.com/tuamsorg",
     psbt: "mailto:PSBT@tuams.org",
     pgp:  "pgp.asc",
-    site: "https://www.tuams.org/",
+    legal: "legal.pdf",
     repo: "https://github.com/tuamsorg/tuams.org",
   },
 
